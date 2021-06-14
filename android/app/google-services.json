@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "840756096666",
+    "project_id": "doctorsonahnd",
+    "storage_bucket": "doctorsonahnd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840756096666:android:a3e51a8bc2ae71b047f923",
+        "android_client_info": {
+          "package_name": "com.example.doctorsonhand"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "840756096666-2fo1rb3im8mj2crdrsbia3i5olov0hrc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCb96_BU6dY8YVtg75N_mfj25LLGL29sUg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "840756096666-2fo1rb3im8mj2crdrsbia3i5olov0hrc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
