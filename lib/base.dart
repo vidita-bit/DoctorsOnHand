@@ -53,9 +53,10 @@ class _BaseCheckState extends State<BaseCheck> {
 }
 
 class BaseBar extends StatelessWidget {
-  BaseBar({Key? key, required this.icon, required this.hint}) : super(key: key);
+  BaseBar({Key? key, required this.icon, required this.hint, required this.validate}) : super(key: key);
   final String icon;
   final String hint;
+  final Function validate;
   @override
   Widget build(BuildContext context){
     return Container(
@@ -68,7 +69,7 @@ class BaseBar extends StatelessWidget {
                     image: AssetImage(globals.textBackground),
           ),
         ),
-        child: TextField(
+        child: TextFormField(
                 style: TextStyle(color: globals.textColor, fontSize: 20),
                 cursorColor: Colors.white,
                 decoration: InputDecoration(
@@ -108,27 +109,27 @@ class BaseLogo extends StatelessWidget {
   }
 }
 
-// class BaseButton extends StatelessWidget {
-//   BaseButton({Key? key, required this.text, required this.primary, required this.secondary, this.weight = FontWeight.normal, this.fontSize = 20, required this.fxn) : super(key: key);
-//   final String text;
-//   final Color primary;
-//   final Color secondary;
-//   final FontWeight weight;
-//   final double fontSize;
-//   final Function fxn;
-//   @override
-//   Widget build(BuildContext context){
-//     return TextButton(
-//       style: TextButton.styleFrom(
-//         primary: primary,
-//         backgroundColor: secondary,
-//         textStyle: TextStyle(fontSize: fontSize, fontWeight: weight),
-//         shape: RoundedRectangleBorder(
-//           borderRadius: BorderRadius.circular(globals.radius/2)
-//         )
-//       ),
-//       onPressed: () => fxn(),
-//       child: Text(text),
-//     );
-//   }
-// }
+class BaseButton extends StatelessWidget {
+  BaseButton({Key? key, required this.text, required this.primary, required this.secondary, this.weight = FontWeight.normal, this.fontSize = 20, required this.fxn}) : super(key: key);
+  final String text;
+  final Color primary;
+  final Color secondary;
+  final FontWeight weight;
+  final double fontSize;
+  final Function fxn;
+  @override
+  Widget build(BuildContext context){
+    return TextButton(
+      style: TextButton.styleFrom(
+        primary: primary,
+        backgroundColor: secondary,
+        textStyle: TextStyle(fontSize: fontSize, fontWeight: weight),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(globals.radius/2)
+        )
+      ),
+      onPressed: () => fxn(),
+      child: Text(text),
+    );
+  }
+}

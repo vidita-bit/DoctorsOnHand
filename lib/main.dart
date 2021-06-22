@@ -6,13 +6,18 @@ import 'globals.dart' as globals;
 import 'base.dart' as base;
 
 
-//similar spacing
 //forgot password
-//refactor buttons
 //authenticate email and phone
 //sliding screen - android and ios
 //fix splash screen
 //handle dynamic sizing
+//SQL injection
+//drop down list doctor, patient, admin
+//one line, bold "I am a"
+//email and phone could be used 
+//registration obscure text and make password and password
+//registration email or phone number
+//if both allow chosing authentication
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -77,37 +82,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                   base.BaseLogo(),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                  base.BaseBar(icon: globals.email, hint: globals.emailHint),
+                  base.BaseBar(icon: globals.email, hint: globals.emailHint, validate: () {}),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                  base.BaseBar(icon: globals.pass, hint: globals.passHint),
+                  base.BaseBar(icon: globals.pass, hint: globals.passHint, validate: () {}),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                  SizedBox( //fuck
+
+                  SizedBox( 
                     width: MediaQuery.of(context).size.width * 0.2,
                     height: MediaQuery.of(context).size.height * 0.1,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        primary: Colors.blue.shade700,
-                        backgroundColor: globals.textColor,
-                        textStyle: TextStyle(fontSize: globals.chosenFontSize, fontWeight: FontWeight.bold),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(globals.radius/2)
-                        )
-                      ),
-                      onPressed: () {},
-                      child: const Text('LOGIN'),
-                    ),
-                    ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                    TextButton( //fuck
-                      style: TextButton.styleFrom(
-                        primary: globals.textColor,
-                        backgroundColor: Colors.transparent,
-                        textStyle: TextStyle(fontSize: globals.chosenFontSize * 0.75),
-                      ),
-                      onPressed: () {Navigator.push(context,MaterialPageRoute(builder : (context) => RegPage()));},
-                      child: Text("Don't have an account? Register"),
-                    ),
-                    
+                    child: base.BaseButton(text: "LOGIN", primary: Colors.blue.shade700, secondary: globals.textColor, fontSize: globals.chosenFontSize, weight: FontWeight.bold, fxn: () {})
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                  base.BaseButton(text: "Don't have an account? Register", primary: globals.textColor, secondary: Colors.transparent, fontSize: globals.chosenFontSize * 0.75, fxn: () {Navigator.push(context,MaterialPageRoute(builder : (context) => RegPage()));})
                 ],
               )
             ), 
