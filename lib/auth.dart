@@ -91,7 +91,6 @@ String? passError(String pass,var key){
   }
   return returnString;
 }
-
 String? confirmError(String confirm, var key){
   if (confirm != globals.keyMap[key].currentState.value){
     return "The passwords do not match!";
@@ -173,9 +172,26 @@ void createProfile(){
   String first = globals.fNameKey.currentState!.value;
   String last = globals.lNameKey.currentState!.value;
   String? phone = globals.phoneKey.currentState!.value;
-  UserProfile.createUser(email,first,last,phone);
+  String pos = globals.roleKey.currentState!.value;
+  UserProfile.createUser(email,first,last,phone,pos);
 }
 
+bool phoneValidate(String num){
+  bool valid = true;
+  for (int i = 0; i < num.length; i++){
+    if (!isNumeric(num[i])){
+      valid = false;
+    }
+  }
+  return valid;
+}
+
+String? phoneError(String num, var key){
+  if (phoneValidate(num)){
+    return null;
+  }
+  return "Please only use numbers!";
+}
 void onReset(BuildContext context) async{
   String toast = "A reset link will be sent to your email if it is registered!";
   try {
@@ -189,6 +205,7 @@ void onReset(BuildContext context) async{
 }
 
 bool roleValidate(String text){
+  print(text.length == 0);
   if (text.length == 0){
     return false;
   }
@@ -254,7 +271,13 @@ void onRegister(BuildContext context) async{
       UserProfile.setUser();
       createProfile();
       print("DOne");
-      String toast = "Please check your email for a validation message!";
+      String toast = "Please check your email and verify it!";
+      if (!UserProfile.getUser().emailVerified){
+        UserProfile.getUser().sendEmailVerification();
+      }
+      else{
+        toast = "Email already verified!";
+      }
       Fluttertoast.showToast(msg: toast, toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 5, backgroundColor: Colors.white, textColor: Colors.red, fontSize: 16.0);
       Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage()));
     }

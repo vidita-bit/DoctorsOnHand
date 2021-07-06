@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'globals.dart' as globals;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'db.dart';
 
 class BaseContainer extends StatelessWidget {
   @override
@@ -16,25 +18,39 @@ class BaseContainer extends StatelessWidget {
 }
 
 class BaseDropDown extends StatefulWidget {
-  BaseDropDown({Key? key, required this.text, this.dropKey = null, required this.fxn, this.mode = AutovalidateMode.onUserInteraction}) : super(key: key);
-  final List<String> text;
+  BaseDropDown({Key? key, required this.document, this.dropKey = null, required this.fxn, this.mode = AutovalidateMode.onUserInteraction}) : super(key: key);
+  List<String> text = List.empty();
   final Function fxn;
   final AutovalidateMode mode;
+  final DocumentReference document;
   var dropKey;
+  
   @override
   _BaseDropDownState createState() => _BaseDropDownState();
+
 }
 class _BaseDropDownState extends State<BaseDropDown> {
-  String dropDownValue = "";
+  @override
+  void initState() {
+    getDoc(widget.document).then((d) {
+      setState(() {print(d.data());widget.text = List<String>.from(d['Roles']);
+      });
+    });
+    super.initState();
+  }
   @override
   Widget build(BuildContext context){
+    String dropDownValue = "";
     return DropdownButtonFormField<String>(
       autovalidateMode: widget.mode,
+      decoration: InputDecoration(
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white))),
       key: widget.dropKey,
-      validator: (value) {widget.fxn(value,widget.dropKey);},
+      validator: (String? value) => widget.fxn(value,widget.dropKey),
       value: dropDownValue,
       style: TextStyle(fontWeight: FontWeight.bold),
-      items: widget.text.map((String value) {
+      items: widget.text == null ? [] : widget.text.map((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value)
@@ -96,7 +112,6 @@ class BaseBar extends StatelessWidget {
   final String hint;
   final bool obscure;
   final AutovalidateMode mode;
-
   var barKey;
   final Function validate;
   @override

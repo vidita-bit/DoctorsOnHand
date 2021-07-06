@@ -15,6 +15,8 @@ final double allPadding = 20;
 final double rightPadding = 10;
 final double iconSize = 64;
 final CollectionReference userCollection = FirebaseFirestore.instance.collection("Users");
+final CollectionReference adminCollection = FirebaseFirestore.instance.collection("Admin");
+
 GlobalKey<FormFieldState> roleKey = GlobalKey<FormFieldState>();
 GlobalKey<FormFieldState> passKey = GlobalKey<FormFieldState>();
 GlobalKey<FormFieldState> conPassKey = GlobalKey<FormFieldState>();
@@ -28,7 +30,6 @@ GlobalKey<FormFieldState> emailResetKey = GlobalKey<FormFieldState>();
 
 final List<GlobalKey<FormFieldState>> loginKeys = [passLoginKey, emailLoginKey];
 
-// final List<GlobalKey<FormFieldState>> regKeys = [passKey, conPassKey, emailKey, fNameKey, lNameKey, roleKey];
-final List<GlobalKey<FormFieldState>> regKeys = [passKey, conPassKey, emailKey, fNameKey, lNameKey];
+final List<GlobalKey<FormFieldState>> regKeys = [passKey, conPassKey, emailKey, fNameKey, lNameKey, roleKey, phoneKey];
 final Map keyMap = {conPassKey : passKey};
 

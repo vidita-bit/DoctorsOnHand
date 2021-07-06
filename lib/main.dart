@@ -8,8 +8,9 @@ import 'user.dart';
 import 'auth.dart' as auth;
 import 'globals.dart' as globals;
 import 'base.dart' as base;
-//phone number - numeric only
-//double check is already validated
+
+//information icon
+//get roles from database
 
 //error text not properly aligned
 //forgot password
