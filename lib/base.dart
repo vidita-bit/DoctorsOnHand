@@ -15,6 +15,44 @@ class BaseContainer extends StatelessWidget {
   }
 }
 
+class BaseDropDown extends StatefulWidget {
+  BaseDropDown({Key? key, required this.text, this.dropKey = null, required this.fxn, this.mode = AutovalidateMode.onUserInteraction}) : super(key: key);
+  final List<String> text;
+  final Function fxn;
+  final AutovalidateMode mode;
+  var dropKey;
+  @override
+  _BaseDropDownState createState() => _BaseDropDownState();
+}
+class _BaseDropDownState extends State<BaseDropDown> {
+  String dropDownValue = "";
+  @override
+  Widget build(BuildContext context){
+    return DropdownButtonFormField<String>(
+      autovalidateMode: widget.mode,
+      key: widget.dropKey,
+      validator: (value) {widget.fxn(value,widget.dropKey);},
+      value: dropDownValue,
+      style: TextStyle(fontWeight: FontWeight.bold),
+      items: widget.text.map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value)
+        );
+      }).toList(),
+      onChanged: (String? newVal) {setState(() {dropDownValue = newVal!;});},
+      iconEnabledColor: Colors.white,
+      iconDisabledColor: Colors.white,
+      selectedItemBuilder: (BuildContext context) {
+          return widget.text.map<Widget>((item) {
+            return Text(item,style: TextStyle(color: Colors.white));
+                
+          }).toList();
+        },
+    );
+  }
+}
+
 
 class BaseText extends StatelessWidget {
   BaseText({Key? key, required this.text, this.weight = FontWeight.normal}) : super(key: key);
@@ -46,16 +84,20 @@ class _BaseCheckState extends State<BaseCheck> {
       title: Text(widget.text, style: TextStyle(color: globals.textColor, fontSize: globals.chosenFontSize)),
       value: isChecked,
       contentPadding: EdgeInsets.all(0),
-      onChanged: (newValue) {
+      onChanged: (bool? newValue) {
         setState(() {isChecked = newValue;})
       ;}));
   }
 }
 
 class BaseBar extends StatelessWidget {
-  BaseBar({Key? key, required this.icon, required this.hint, required this.validate}) : super(key: key);
+  BaseBar({Key? key, this.mode = AutovalidateMode.onUserInteraction, required this.icon, required this.hint, required this.validate, this.barKey = null, this.obscure = false}) : super(key: key);
   final String icon;
   final String hint;
+  final bool obscure;
+  final AutovalidateMode mode;
+
+  var barKey;
   final Function validate;
   @override
   Widget build(BuildContext context){
@@ -70,8 +112,12 @@ class BaseBar extends StatelessWidget {
           ),
         ),
         child: TextFormField(
+                key: barKey,
+                autovalidateMode: mode,
+                obscureText: obscure,
                 style: TextStyle(color: globals.textColor, fontSize: 20),
                 cursorColor: Colors.white,
+                validator: (text) => this.validate(text,barKey),
                 decoration: InputDecoration(
                   hintText: hint,
                   hintStyle: TextStyle(color: globals.textColor, fontSize: globals.chosenFontSize),
@@ -133,3 +179,7 @@ class BaseButton extends StatelessWidget {
     );
   }
 }
+
+
+
+
