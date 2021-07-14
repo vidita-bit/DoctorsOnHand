@@ -36,6 +36,9 @@ class _ResetPageState extends State<ResetPage>{
                     height: MediaQuery.of(context).size.height * 0.1,
                     child: base.BaseButton(text: "SUBMIT", primary: Colors.blue.shade700, secondary: globals.textColor, fontSize: globals.chosenFontSize, weight: FontWeight.bold, fxn: () {auth.onReset(context);})
                   ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+                  base.BaseButton(text: "Remember your password? Log in", primary: globals.textColor, secondary: Colors.transparent, fontSize: globals.chosenFontSize * 0.75, fxn: () {Navigator.pop(context);}),
+
                 ]
               )
             )

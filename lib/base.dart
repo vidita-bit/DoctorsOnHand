@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'globals.dart' as globals;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'db.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class BaseContainer extends StatelessWidget {
   @override
@@ -32,7 +32,7 @@ class BaseDropDown extends StatefulWidget {
 class _BaseDropDownState extends State<BaseDropDown> {
   @override
   void initState() {
-    getDoc(widget.document).then((d) {
+    widget.document.get().then((d) {
       setState(() {print(d.data());widget.text = List<String>.from(d['Roles']);
       });
     });
@@ -196,5 +196,43 @@ class BaseButton extends StatelessWidget {
 }
 
 
+
+
+class BaseRow extends StatefulWidget {
+  BaseRow({Key? key, required this.index, required this.keys, required this.values, required this.fxns, required this.cols, required this.rows, required this.sizedWidth}) : super(key: key);
+  final int index;
+  final List<String> keys;
+  final List<String> values;
+  var fxns;
+  final int cols;
+  final int rows;
+  int j = 0;
+  var sizedWidth;
+  @override
+  _BaseRowState createState() => _BaseRowState();
+}
+
+class _BaseRowState extends State<BaseRow> {
+  // @override
+  // void initState{
+    
+  //   super.initState();
+  // }
+  @override
+  Widget build(BuildContext context) { 
+    return Container(width: MediaQuery.of(context).size.width, height: MediaQuery.of(context).size.height * (1/widget.rows), 
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget> [
+          SizedBox(width: MediaQuery.of(context).size.height * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
+          for (widget.j = 0; widget.j < widget.keys.length; widget.j++) Expanded(child: Container(width: MediaQuery.of(context).size.width * (1/widget.cols), height: MediaQuery.of(context).size.height * (1/widget.rows), child: TextButton.icon(onPressed: widget.fxns[widget.j], icon: Image.network(widget.values[widget.j]),label: Text(widget.keys[widget.j])))),
+          SizedBox(width: MediaQuery.of(context).size.height * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
+          ]
+        )
+      );
+  }
+    
+}
 
 

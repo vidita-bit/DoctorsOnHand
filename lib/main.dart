@@ -8,10 +8,12 @@ import 'user.dart';
 import 'auth.dart' as auth;
 import 'globals.dart' as globals;
 import 'base.dart' as base;
+import 'wait.dart';
 
 //information icon
-//get roles from database
-
+//user created, user last log in dates, last modification
+//location
+//password rules reset
 //error text not properly aligned
 //forgot password
 //authenticate email and phone
@@ -29,34 +31,36 @@ Future<void> main() async {
   print("main runs");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  User? user = FirebaseAuth.instance.currentUser;
-  Widget widget;
-
-  if (user != null){
-    widget = HomePage();
-    UserProfile.setUser();
-  }
-  else{
-    widget = MyHomePage();
-  }
-  runApp(MyApp(widget: widget));
+  runApp(MyApp());
 }
 
 
 class MyApp extends StatelessWidget {
-  MyApp({required this.widget});
-  final Widget widget;
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: widget,
+      home: chooseWidget(),
     );
+  }
+
+  Widget chooseWidget(){
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null){
+      UserProfile.setUser();
+      UserProfile.userSetup();
+      if (UserProfile.getRole() == null) return CircularProgressIndicator();
+      return HomePage(); 
+    }
+    else{
+      return LoginPage();
+    }
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key}) : super(key: key);
+class LoginPage extends StatefulWidget {
+  LoginPage({Key? key}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -68,10 +72,10 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done

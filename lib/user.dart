@@ -54,19 +54,30 @@ class UserProfile {
   static String getUid(){
     return FirebaseAuth.instance.currentUser!.uid.toString();
   }
-
-  static void createUser(String emailAdd, String firstName, String lastName, String? phoneNum, String pos){
+  static void setAll(String emailAdd, String firstName, String lastName, String? phoneNum, String pos) {
     setEmail(emailAdd);
     setFName(firstName);
     setLName(lastName);
     setNum(phoneNum);
     setRole(pos);
+  }
+  static void createUser(String emailAdd, String firstName, String lastName, String? phoneNum, String pos){
+    setAll(emailAdd, firstName, lastName, phoneNum, pos);
     Map<String,dynamic> map = toMap();
     globals.userCollection.doc(getUid()).set(map).catchError((error) => print("new user failed $error"));
+    var timestamp = FieldValue.serverTimestamp();
+    globals.userCollection.doc(getUid()).update({"createdOn":timestamp,"usedOn":timestamp, "editedOn":timestamp}).catchError((error) => print("new user timestamp failed $error"));
   }
 
   static Map<String,dynamic> toMap(){
     return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "role" : getRole()};
+  }
+
+  static void userSetup(){
+      globals.userCollection.doc(getUid()).update({"usedOn":FieldValue.serverTimestamp()}).catchError((error) => print("getting user failed $error"));
+      globals.userCollection.doc(getUid()).get().then((d) {
+        setAll(d['email'], d['first'], d['last'], d['phone'], d['role']);
+      });
   }
 
 

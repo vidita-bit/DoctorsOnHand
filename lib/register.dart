@@ -34,7 +34,7 @@ class _RegPageState extends State<RegPage>{
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget> [Expanded(child: base.BaseText(text: "I am a ")),Expanded(child: base.BaseDropDown(document: globals.adminCollection.doc("Roles"), fxn: auth.roleError, dropKey: globals.roleKey))]
+                  children: <Widget> [Expanded(child: base.BaseText(text: "I am a ")),Expanded(child: base.BaseDropDown(document: globals.rolesDoc, fxn: auth.roleError, dropKey: globals.roleKey))]
                   )),
                 // Container(width:MediaQuery.of(context).size.width * (1/6), height: MediaQuery.of(context).size.height * 0.03, child: base.BaseCheck(text: "Doctor")),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
