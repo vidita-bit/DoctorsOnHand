@@ -29,14 +29,16 @@ import 'wait.dart';
 //if both allow chosing authentication
 Future<void> main() async {
   print("main runs");
+  User? user = FirebaseAuth.instance.currentUser;
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(MyApp(user: user));
 }
 
 
 class MyApp extends StatelessWidget {
-
+  MyApp({Key? key, User? this.user}) : super(key: key);
+  User? user;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -46,8 +48,7 @@ class MyApp extends StatelessWidget {
   }
 
   Widget chooseWidget(){
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null){
+    if (this.user != null){
       UserProfile.setUser();
       UserProfile.userSetup();
       if (UserProfile.getRole() == null) return CircularProgressIndicator();

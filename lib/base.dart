@@ -202,7 +202,7 @@ class BaseRow extends StatefulWidget {
   BaseRow({Key? key, required this.index, required this.keys, required this.values, required this.fxns, required this.cols, required this.rows, required this.sizedWidth}) : super(key: key);
   final int index;
   final List<String> keys;
-  final List<String> values;
+  final List<dynamic> values;
   var fxns;
   final int cols;
   final int rows;
@@ -226,7 +226,7 @@ class _BaseRowState extends State<BaseRow> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget> [
           SizedBox(width: MediaQuery.of(context).size.height * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
-          for (widget.j = 0; widget.j < widget.keys.length; widget.j++) Expanded(child: Container(width: MediaQuery.of(context).size.width * (1/widget.cols), height: MediaQuery.of(context).size.height * (1/widget.rows), child: TextButton.icon(onPressed: widget.fxns[widget.j], icon: Image.network(widget.values[widget.j]),label: Text(widget.keys[widget.j])))),
+          for (widget.j = 0; widget.j < widget.keys.length; widget.j++) Expanded(child: Container(width: MediaQuery.of(context).size.width * (1/widget.cols), height: MediaQuery.of(context).size.height * (1/widget.rows), child: RaisedButton(onPressed: widget.fxns[widget.j], color: Colors.transparent, child: Column(mainAxisSize: MainAxisSize.min, children: <Widget> [Expanded(flex: 5, child: Image.network(widget.values[widget.j])),Expanded(flex: 1, child: Text(widget.keys[widget.j], style: TextStyle(fontWeight: FontWeight.bold, color: globals.textColor)))])))),
           SizedBox(width: MediaQuery.of(context).size.height * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
           ]
         )

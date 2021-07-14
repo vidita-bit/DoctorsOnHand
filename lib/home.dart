@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'globals.dart' as globals;
 import 'base.dart' as base;
 import 'user.dart';
@@ -10,10 +11,10 @@ import 'wait.dart';
 class HomePage extends StatefulWidget{
   HomePage({Key? key}) : super(key: key);
   Map<String, String> icons = {};
-  final List<Function?> fxns = [null, null,null, null,null, null,null];
+  final List<Function?> fxns = [() {}, () {},() {}, () {},() {}, () {},() {}];
   List<String> keys = List.empty();
   List<String> values = List.empty();
-  List<String> downloadPaths = List.empty();
+  List<dynamic> downloadPaths = List.empty();
   int i = 0;
   final int cols = 3;
   final int rows = 5;
@@ -80,31 +81,9 @@ class _HomePageState extends State<HomePage>{
           )
         );
   }
-  Future<void> getPaths() async{
-    print(widget.values);    
-    print("eheh");
-    for (int k = 0; k < widget.values.length; k++){
-      String path = widget.values[k];
-      print(path);
-      var url = globals.storage.ref(path).getDownloadURL().then((url) {widget.downloadPaths.add(url);})
-      print(url);
-    }
-      print("hereere");
-      // setState(() {
-      //   widget.downloadPaths.add(URL);
-      //   print("ddd");
-      //   print(widget.downloadPaths);
-      // });
-    // }));
-  }
+ 
   Widget buildRow(index){
-    if (done() == null){
-      if (widget.called == false){
-        getPaths();
-        widget.called = true;
-      }
-      return CircularProgressIndicator();
-    }
+   
     int end = index + widget.cols;
     print(widget.downloadPaths);
     print("hehee");
@@ -112,7 +91,7 @@ class _HomePageState extends State<HomePage>{
     end = min(end,widget.keys.length);
     var sizedWidth = ((1 - ((1/widget.cols) * (widget.keys.length % widget.cols)))/2);
     widget.i += widget.cols;
-    return base.BaseRow(index: index, keys: widget.keys.sublist(index, end), values: widget.downloadPaths.sublist(index, end), fxns: widget.fxns.sublist(index, end), cols: widget.cols, rows: widget.rows, sizedWidth: sizedWidth);
+    return base.BaseRow(index: index, keys: widget.keys.sublist(index, end), values: widget.values.sublist(index, end), fxns: widget.fxns.sublist(index, end), cols: widget.cols, rows: widget.rows, sizedWidth: sizedWidth);
   }
 
   bool? done(){
