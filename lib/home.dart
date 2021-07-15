@@ -6,18 +6,19 @@ import 'base.dart' as base;
 import 'user.dart';
 import 'dart:core';
 import 'dart:math';
-import 'wait.dart';
+import 'profile.dart';
 
 class HomePage extends StatefulWidget{
-  HomePage({Key? key}) : super(key: key);
+  HomePage({Key? key, required this.context}) : super(key: key);
+  BuildContext context;
   Map<String, String> icons = {};
-  final List<Function?> fxns = [() {}, () {},() {}, () {},() {}, () {},() {}];
+  List<Function?> fxns = List.empty();
   List<String> keys = List.empty();
   List<String> values = List.empty();
   List<dynamic> downloadPaths = List.empty();
   int i = 0;
-  final int cols = 3;
-  final int rows = 5;
+  int cols = 3;
+  int rows = 5;
   bool called = false;
   @override
   _HomePageState createState() => _HomePageState();
@@ -26,9 +27,14 @@ class HomePage extends StatefulWidget{
 class _HomePageState extends State<HomePage>{
   @override
   void initState() {
+    widget.fxns = [() {}, () {},() {}, () {Navigator.push(this.context, MaterialPageRoute(builder : (context) => ProfilePage()));},() {}, () {},() {}];
     globals.IconsDoc.get().then((d) {
       print(d.data());
       setState(() {
+          var grid = d['Grid'];
+          widget.cols = grid['Col'];
+          widget.rows = grid['Row'];
+
           Map<String, String> map = {};
           List<String>.from(d["Patient Names"]).forEach((item) => map[item] = d["Patient"][item]);
           String role = UserProfile.getRole();
@@ -52,7 +58,6 @@ class _HomePageState extends State<HomePage>{
         });
     });
     
-    super.initState();
   }
     
   @override
@@ -83,7 +88,6 @@ class _HomePageState extends State<HomePage>{
   }
  
   Widget buildRow(index){
-   
     int end = index + widget.cols;
     print(widget.downloadPaths);
     print("hehee");

@@ -9,12 +9,19 @@ class UserProfile {
   static String last = "";
   static String? phone;
   static String role = "";
+  static List<String> addresses = [];
   static var user = null;
 
   static void setUser(){
     user = FirebaseAuth.instance.currentUser;
   }
 
+  static void setAddresses(List<String> a){
+    addresses = a;
+  }
+  static void addAddress(String address){
+    addresses.add(address);
+  }
   static void setEmail(String emailAdd){
     email = emailAdd;
   }
@@ -35,7 +42,11 @@ class UserProfile {
   static String getRole(){
     return role;
   }
+  static List<String> getAddresses(){
+    return addresses;
+  }
   static String getEmail(){
+    print("THIS");
     return email;
   }
   static String getFName(){
@@ -54,12 +65,16 @@ class UserProfile {
   static String getUid(){
     return FirebaseAuth.instance.currentUser!.uid.toString();
   }
-  static void setAll(String emailAdd, String firstName, String lastName, String? phoneNum, String pos) {
+  static void setAll(String emailAdd, String firstName, String lastName, String? phoneNum, String pos,{List<String>? addresses = null}) { 
     setEmail(emailAdd);
     setFName(firstName);
     setLName(lastName);
     setNum(phoneNum);
     setRole(pos);
+    if (addresses != null){
+      setAddresses(addresses);
+    }
+    print("TTHIS HAS BEEEN SET ADAM!!!!");
   }
   static void createUser(String emailAdd, String firstName, String lastName, String? phoneNum, String pos){
     setAll(emailAdd, firstName, lastName, phoneNum, pos);
@@ -70,13 +85,15 @@ class UserProfile {
   }
 
   static Map<String,dynamic> toMap(){
-    return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "role" : getRole()};
+    return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "role" : getRole(), "addresses": FieldValue.arrayUnion(getAddresses())};
   }
 
   static void userSetup(){
+      print("THIS WAS CALLED");
       globals.userCollection.doc(getUid()).update({"usedOn":FieldValue.serverTimestamp()}).catchError((error) => print("getting user failed $error"));
       globals.userCollection.doc(getUid()).get().then((d) {
-        setAll(d['email'], d['first'], d['last'], d['phone'], d['role']);
+        print("done");
+        setAll(d['email'], d['first'], d['last'], d['phone'], d['role'], addresses: List<String>.from(d['addresses']));
       });
   }
 

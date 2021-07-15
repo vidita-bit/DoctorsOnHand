@@ -17,10 +17,17 @@ final double allPadding = 20;
 final double rightPadding = 10;
 final double iconSize = 64;
 final FirebaseStorage storage = FirebaseStorage.instance;
-final CollectionReference userCollection = FirebaseFirestore.instance.collection("Users");
-final CollectionReference adminCollection = FirebaseFirestore.instance.collection("Admin");
+final FirebaseFirestore firestore = FirebaseFirestore.instance;
+final CollectionReference userCollection = firestore.collection("Users");
+final CollectionReference reqCollection = firestore.collection("Requests");
+final CollectionReference adminCollection = firestore.collection("Admin");
 final DocumentReference IconsDoc = adminCollection.doc("Icons");
 final DocumentReference rolesDoc = adminCollection.doc("Roles");
+final GlobalKey<FormFieldState> roleProfKey = GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> emailProfKey = GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> fNameProfKey = GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> lNameProfKey = GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> phoneProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> roleKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> passKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> conPassKey = GlobalKey<FormFieldState>();
@@ -33,6 +40,8 @@ final GlobalKey<FormFieldState> emailLoginKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> emailResetKey = GlobalKey<FormFieldState>();
 final List<GlobalKey<FormFieldState>> loginKeys = [passLoginKey, emailLoginKey];
 final List<GlobalKey<FormFieldState>> regKeys = [passKey, conPassKey, emailKey, fNameKey, lNameKey, roleKey, phoneKey];
+final List<GlobalKey<FormFieldState>> profKeys = [emailProfKey, fNameProfKey, lNameProfKey, roleProfKey, phoneProfKey];
+
 final Map keyMap = {conPassKey : passKey};
 
 class Wrapper{

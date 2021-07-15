@@ -18,11 +18,12 @@ class BaseContainer extends StatelessWidget {
 }
 
 class BaseDropDown extends StatefulWidget {
-  BaseDropDown({Key? key, required this.document, this.dropKey = null, required this.fxn, this.mode = AutovalidateMode.onUserInteraction}) : super(key: key);
+  BaseDropDown({Key? key,required this.fieldName, required this.document, this.dropKey = null, required this.fxn, this.mode = AutovalidateMode.onUserInteraction}) : super(key: key);
   List<String> text = List.empty();
   final Function fxn;
+  final String fieldName;
   final AutovalidateMode mode;
-  final DocumentReference document;
+  DocumentReference document;
   var dropKey;
   
   @override
@@ -32,10 +33,14 @@ class BaseDropDown extends StatefulWidget {
 class _BaseDropDownState extends State<BaseDropDown> {
   @override
   void initState() {
+    print(widget.fieldName);
     widget.document.get().then((d) {
-      setState(() {print(d.data());widget.text = List<String>.from(d['Roles']);
+      setState(() {print(d.data());widget.text = List<String>.from(d[widget.fieldName]);
       });
     });
+    
+   
+    print(widget.text);
     super.initState();
   }
   @override
@@ -107,7 +112,8 @@ class _BaseCheckState extends State<BaseCheck> {
 }
 
 class BaseBar extends StatelessWidget {
-  BaseBar({Key? key, this.mode = AutovalidateMode.onUserInteraction, required this.icon, required this.hint, required this.validate, this.barKey = null, this.obscure = false}) : super(key: key);
+  BaseBar({Key? key, this.initialValue = "", this.mode = AutovalidateMode.onUserInteraction, required this.icon, required this.hint, required this.validate, this.barKey = null, this.obscure = false}) : super(key: key);
+  final String? initialValue;
   final String icon;
   final String hint;
   final bool obscure;
@@ -127,6 +133,7 @@ class BaseBar extends StatelessWidget {
           ),
         ),
         child: TextFormField(
+                initialValue: initialValue,
                 key: barKey,
                 autovalidateMode: mode,
                 obscureText: obscure,

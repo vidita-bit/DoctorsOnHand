@@ -147,7 +147,7 @@ String? nameError(String name, var key){
     return null;
   }
   String type = "first";
-  if (key == globals.lNameKey){
+  if (key == globals.lNameKey || key == globals.lNameProfKey){
     type = "last";
   }
   return "Please provide a valid " + type + " name!";
@@ -234,7 +234,9 @@ void onLogin(BuildContext context) async{
         email: globals.emailLoginKey.currentState!.value,
         password: globals.passLoginKey.currentState!.value
       );
-      Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage()));
+      UserProfile.setUser();
+      UserProfile.userSetup();
+      Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage(context: context)));
     }
     on FirebaseAuthException catch (e) {
       print("reached 2");
@@ -279,7 +281,7 @@ void onRegister(BuildContext context) async{
         toast = "Email already verified!";
       }
       Fluttertoast.showToast(msg: toast, toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 5, backgroundColor: Colors.white, textColor: Colors.red, fontSize: 16.0);
-      Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage()));
+      Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage(context: context)));
     }
     on FirebaseAuthException catch (e){
       if (e.code == 'email-already-in-use'){

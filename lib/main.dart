@@ -43,16 +43,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: chooseWidget(),
+      home: chooseWidget(context),
     );
   }
 
-  Widget chooseWidget(){
+  Widget chooseWidget(BuildContext context){
     if (this.user != null){
       UserProfile.setUser();
       UserProfile.userSetup();
       if (UserProfile.getRole() == null) return CircularProgressIndicator();
-      return HomePage(); 
+      return HomePage(context : context); 
     }
     else{
       return LoginPage();
