@@ -82,7 +82,7 @@ class _ProfilePageState extends State<ProfilePage>{
 
     // },child: Container(width: MediaQuery.of(context).size.width * 0.01, height: MediaQuery.of(context).size.height * 0.01, decoration: BoxDecoration(color: add ? Colors.green : Colors.red, borderRadius: BorderRadius.circular(20)), child: icon));
 
-    return base.BaseBar(offset: 0.02, initialValue: address, icon: globals.address, hint: "Enter Address", validate: () {}, barKey: widget.manager.addKey(i));
+    return base.BaseBar(offset: 0.02, initialValue: address, icon: globals.address, hint: "Enter Home Address", validate: () {}, barKey: widget.manager.addKey(i));
     // return base.BaseLookAheadBar(offset: 0.02, itemIcon: Icon(Icons.location_pin, color: Colors.black), barKey: widget.manager.addKey(i), initialValue: address, trailing: trailing, icon: Icon(Icons.location_pin, color: Colors.white), hint: "Enter Address", onChanged: (text) async {
     //   // String key = "AIzaSyDs5qT4f9iPYwO6XfZjVMd8AhVZ5IoXTH8";
     //   // var googlePlace = GooglePlace(key,proxyUrl: kIsWeb
@@ -202,3 +202,4 @@ class _ProfilePageState extends State<ProfilePage>{
 
 
 
+//transaction, recently edited

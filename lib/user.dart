@@ -158,7 +158,8 @@ class UserProfile {
       );
   }
   static void updateUser(Map<String,dynamic> map){
-      globals.userCollection.doc(getUid()).update(map).catchError((error) => print("User update failed $error"));
+    map["editedOn"] = FieldValue.serverTimeStamp();
+    globals.userCollection.doc(getUid()).update(map).catchError((error) => print("User update failed $error"));
   }
   static void createUser(String emailAdd, String firstName, String lastName, String? phoneNum, String pos){
     setAll(emailAdd, firstName, lastName, phoneNum, imageAdd: imageAddress, role: pos);
