@@ -8,7 +8,6 @@ import 'user.dart';
 import 'auth.dart' as auth;
 import 'globals.dart' as globals;
 import 'base.dart' as base;
-import 'wait.dart';
 
 //information icon
 //user created, user last log in dates, last modification
@@ -29,9 +28,9 @@ import 'wait.dart';
 //if both allow chosing authentication
 Future<void> main() async {
   print("main runs");
-  User? user = FirebaseAuth.instance.currentUser;
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  User? user = FirebaseAuth.instance.currentUser;
   runApp(MyApp(user: user));
 }
 
@@ -51,7 +50,7 @@ class MyApp extends StatelessWidget {
     if (this.user != null){
       UserProfile.setUser();
       UserProfile.userSetup();
-      if (UserProfile.getRole() == null) return CircularProgressIndicator();
+      if (UserProfile.getVerifiedRoles() == null) return CircularProgressIndicator();
       return HomePage(context : context); 
     }
     else{
@@ -101,10 +100,8 @@ class _LoginPageState extends State<LoginPage> {
                   SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                   base.BaseLogo(),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                  base.BaseBar(icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailLoginKey),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                  base.BaseBar(icon: globals.pass, hint: globals.passHint, validate: auth.loginError, obscure: true, barKey: globals.passLoginKey, mode: AutovalidateMode.disabled),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.005),
+                  base.BaseBar(offset: 0.02, icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailLoginKey),
+                  base.BaseBar(offset: 0.02, icon: globals.pass, hint: globals.passHint, validate: auth.loginError, obscure: true, barKey: globals.passLoginKey, mode: AutovalidateMode.disabled),
                   base.BaseButton(text: "Forgot your password?", primary: globals.textColor, secondary: Colors.transparent, fontSize: globals.chosenFontSize * 0.75, fxn: () {Navigator.push(context,MaterialPageRoute(builder : (context) => ResetPage()));}),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.005),
                   SizedBox( 

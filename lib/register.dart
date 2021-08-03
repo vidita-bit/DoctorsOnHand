@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'globals.dart' as globals;
 import 'base.dart' as base;
 import 'auth.dart' as auth;
-import 'db.dart';
 //similar spacing
 class RegPage extends StatefulWidget{
   RegPage({Key? key}) : super(key: key);
@@ -34,22 +33,16 @@ class _RegPageState extends State<RegPage>{
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget> [Expanded(child: base.BaseText(text: "I am a ")),Expanded(child: base.BaseDropDown(document: globals.rolesDoc, fieldName: "Roles", fxn: auth.roleError, dropKey: globals.roleKey))]
+                  children: <Widget> [Expanded(child: base.BaseText(text: "I am a ")),Expanded(child: base.BaseDropDown(text: [], document: globals.rolesDoc, fieldName: "Roles", fxn: auth.roleError, dropKey: globals.roleKey))]
                   )),
                 // Container(width:MediaQuery.of(context).size.width * (1/6), height: MediaQuery.of(context).size.height * 0.03, child: base.BaseCheck(text: "Doctor")),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                base.BaseBar(icon: "photos/name.png", hint: "First Name", validate: auth.nameError, barKey: globals.fNameKey),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                base.BaseBar(icon: "photos/name.png", hint: "Last Name",validate: auth.nameError, barKey: globals.lNameKey),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                base.BaseBar(icon: "photos/phone.png", hint: "Phone Number (optional)", validate: auth.phoneError, barKey: globals.phoneKey),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                base.BaseBar(icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailKey),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                base.BaseBar(icon: globals.pass, hint: globals.passHint, validate: auth.passError, obscure: true, barKey: globals.passKey),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                base.BaseBar(icon: globals.pass, hint: "Confirm " + globals.passHint, validate: auth.confirmError, obscure: true, barKey: globals.conPassKey),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                base.BaseBar(offset: 0.02, icon: "photos/name.png", hint: "First Name", validate: auth.nameError, barKey: globals.fNameKey),
+                base.BaseBar(offset: 0.02, icon: "photos/name.png", hint: "Last Name",validate: auth.nameError, barKey: globals.lNameKey),
+                base.BaseBar(offset: 0.02, icon: "photos/phone.png", hint: "Phone Number (optional)", validate: auth.phoneError, barKey: globals.phoneKey),
+                base.BaseBar(offset: 0.02, icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailKey),
+                base.BaseBar(offset: 0.02, icon: globals.pass, hint: globals.passHint, validate: auth.passError, obscure: true, barKey: globals.passKey),
+                base.BaseBar(offset: 0.02, icon: globals.pass, hint: "Confirm " + globals.passHint, validate: auth.confirmError, obscure: true, barKey: globals.conPassKey),
                 SizedBox( 
                     width: MediaQuery.of(context).size.width * 0.2,
                     height: MediaQuery.of(context).size.height * 0.1,

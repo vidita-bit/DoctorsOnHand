@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'globals.dart' as globals;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
 
 class BaseContainer extends StatelessWidget {
   @override
@@ -18,34 +18,44 @@ class BaseContainer extends StatelessWidget {
 }
 
 class BaseDropDown extends StatefulWidget {
-  BaseDropDown({Key? key,required this.fieldName, required this.document, this.dropKey = null, required this.fxn, this.mode = AutovalidateMode.onUserInteraction}) : super(key: key);
-  List<String> text = List.empty();
+  BaseDropDown({Key? key, this.fieldName, required this.text, this.document, this.dropKey, required this.fxn, this.mode = AutovalidateMode.onUserInteraction}) : super(key: key);
+  String? fieldName;
+  List<String> text;
   final Function fxn;
-  final String fieldName;
   final AutovalidateMode mode;
-  DocumentReference document;
+  var document;
   var dropKey;
-  
+  BaseDropDownState state = BaseDropDownState();
   @override
-  _BaseDropDownState createState() => _BaseDropDownState();
+  BaseDropDownState createState() => state;
+  
 
 }
-class _BaseDropDownState extends State<BaseDropDown> {
+class BaseDropDownState extends State<BaseDropDown> {
+  String dropDownValue = "";
+
   @override
   void initState() {
-    print(widget.fieldName);
-    widget.document.get().then((d) {
-      setState(() {print(d.data());widget.text = List<String>.from(d[widget.fieldName]);
+    print(widget.text);
+    if (widget.document != null){
+      widget.document.get().then((d) {
+        setState(() {
+          try{
+            widget.text = List<String>.from(d[widget.fieldName]);
+          }
+          catch (e){
+            print(e);
+          }
+        });
       });
-    });
-    
-   
+    }
+
     print(widget.text);
     super.initState();
   }
+
   @override
   Widget build(BuildContext context){
-    String dropDownValue = "";
     return DropdownButtonFormField<String>(
       autovalidateMode: widget.mode,
       decoration: InputDecoration(
@@ -72,6 +82,7 @@ class _BaseDropDownState extends State<BaseDropDown> {
         },
     );
   }
+
 }
 
 
@@ -111,10 +122,78 @@ class _BaseCheckState extends State<BaseCheck> {
   }
 }
 
+class BaseLookAheadBar extends StatelessWidget {
+  BaseLookAheadBar({Key? key, required this.itemIcon, required this.icon, required this.onChanged, this.initialValue = "", required this.offset, this.trailing = null, required this.hint, this.barKey = null}) : super(key: key);
+  final double offset;
+  final String initialValue;
+  final Widget itemIcon;
+  final Widget icon;
+  final Widget? trailing;
+  final String hint;
+  var onChanged;
+  var barKey;
+  // final Function validate;
+  //immediate showing and return immediate
+  Widget build(BuildContext context){
+    return Column(children: <Widget> [
+      Container(
+        width: MediaQuery.of(context).size.width * 0.3,
+        height: MediaQuery.of(context).size.height * 0.05,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(globals.radius),
+          image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: AssetImage(globals.textBackground),
+          ),
+        ),
+        child: TypeAheadFormField(
+        key: barKey,
+        validator: (text) {},
+        initialValue: initialValue,
+        getImmediateSuggestions: false,
+        textFieldConfiguration: TextFieldConfiguration(
+          cursorColor: globals.textColor,
+          autofocus: false,
+          style: TextStyle(
+            color: globals.textColor,
+            fontFamily: globals.font,
+            fontSize: globals.chosenFontSize,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: globals.textColor, fontSize: globals.chosenFontSize),
+            border: InputBorder.none,
+            suffixIcon: trailing,
+            prefixIcon: icon,
+          )
+        ),
+        suggestionsCallback: (pattern)  {
+          return onChanged(pattern);
+        },
+        itemBuilder: (context, suggestion) {
+          
+          print(suggestion);
+          return ListTile(
+            leading: itemIcon,
+            title: Text("x"),
+            subtitle: Text("subtitle"),
+          );
+        },
+        onSuggestionSelected: (suggestion) {
+          print(suggestion);
+        },
+      )),
+      SizedBox(height: MediaQuery.of(context).size.height * offset)]);
+
+  }
+}
+
 class BaseBar extends StatelessWidget {
-  BaseBar({Key? key, this.initialValue = "", this.mode = AutovalidateMode.onUserInteraction, required this.icon, required this.hint, required this.validate, this.barKey = null, this.obscure = false}) : super(key: key);
+  BaseBar({Key? key, required this.offset, this.trailing = null, this.initialValue = "", this.mode = AutovalidateMode.onUserInteraction, required this.icon, required this.hint, required this.validate, this.barKey = null, this.obscure = false}) : super(key: key);
+  final double offset;
   final String? initialValue;
   final String icon;
+  final Widget? trailing;
   final String hint;
   final bool obscure;
   final AutovalidateMode mode;
@@ -122,7 +201,8 @@ class BaseBar extends StatelessWidget {
   final Function validate;
   @override
   Widget build(BuildContext context){
-    return Container(
+    return Column(children: <Widget>[
+      Container(
         width: MediaQuery.of(context).size.width * 0.3,
         height: MediaQuery.of(context).size.height * 0.05,
         decoration: BoxDecoration(
@@ -137,8 +217,8 @@ class BaseBar extends StatelessWidget {
                 key: barKey,
                 autovalidateMode: mode,
                 obscureText: obscure,
-                style: TextStyle(color: globals.textColor, fontSize: 20),
-                cursorColor: Colors.white,
+                style: TextStyle(color: globals.textColor, fontSize: globals.chosenFontSize),
+                cursorColor: globals.textColor,
                 validator: (text) => this.validate(text,barKey),
                 decoration: InputDecoration(
                   hintText: hint,
@@ -146,6 +226,7 @@ class BaseBar extends StatelessWidget {
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.01),
+                  suffixIcon: trailing,
                   prefixIcon: Transform.scale(scale: 1, child: Padding(
                       padding:EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.02), 
                       child:Image(
@@ -157,8 +238,11 @@ class BaseBar extends StatelessWidget {
                   )
                   )
                 )
-        )
-    );
+        )),
+      SizedBox(height: MediaQuery.of(context).size.height * offset),
+
+
+    ]);
   }
 }
 
@@ -226,20 +310,21 @@ class _BaseRowState extends State<BaseRow> {
   //   super.initState();
   // }
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     return Container(width: MediaQuery.of(context).size.width, height: MediaQuery.of(context).size.height * (1/widget.rows), 
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget> [
-          SizedBox(width: MediaQuery.of(context).size.height * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
+          SizedBox(width: MediaQuery.of(context).size.width * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
           for (widget.j = 0; widget.j < widget.keys.length; widget.j++) Expanded(child: Container(width: MediaQuery.of(context).size.width * (1/widget.cols), height: MediaQuery.of(context).size.height * (1/widget.rows), child: RaisedButton(onPressed: widget.fxns[widget.j], color: Colors.transparent, child: Column(mainAxisSize: MainAxisSize.min, children: <Widget> [Expanded(flex: 5, child: Image.network(widget.values[widget.j])),Expanded(flex: 1, child: Text(widget.keys[widget.j], style: TextStyle(fontWeight: FontWeight.bold, color: globals.textColor)))])))),
-          SizedBox(width: MediaQuery.of(context).size.height * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
+          SizedBox(width: MediaQuery.of(context).size.width * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
           ]
         )
       );
   }
     
 }
+
 
 

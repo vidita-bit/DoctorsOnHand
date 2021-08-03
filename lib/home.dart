@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'globals.dart' as globals;
 import 'base.dart' as base;
 import 'user.dart';
@@ -19,6 +17,7 @@ class HomePage extends StatefulWidget{
   int i = 0;
   int cols = 3;
   int rows = 5;
+  double basePadding = 1/4;
   bool called = false;
   @override
   _HomePageState createState() => _HomePageState();
@@ -27,35 +26,43 @@ class HomePage extends StatefulWidget{
 class _HomePageState extends State<HomePage>{
   @override
   void initState() {
-    widget.fxns = [() {}, () {},() {}, () {Navigator.push(this.context, MaterialPageRoute(builder : (context) => ProfilePage()));},() {}, () {},() {}];
-    globals.IconsDoc.get().then((d) {
+    //better way for this needed
+    widget.fxns = [() {}, () {},() {}, () {Navigator.push(this.context, MaterialPageRoute(builder : (context) => ProfilePage()));},() {}, () {},() {}, () {}, () {}, () {}, () {}];
+    globals.iconsDoc.get().then((d) {
       print(d.data());
       setState(() {
           var grid = d['Grid'];
           widget.cols = grid['Col'];
           widget.rows = grid['Row'];
-
+          widget.basePadding = grid["lateralPadding"];
           Map<String, String> map = {};
-          List<String>.from(d["Patient Names"]).forEach((item) => map[item] = d["Patient"][item]);
-          String role = UserProfile.getRole();
-
-         if (role != "Patient"){
+          List<String>.from(d[globals.baseRole + " Names"]).forEach((item) => map[item] = d[globals.baseRole][item]);
+          List<String> roles = UserProfile.getVerifiedRoles();
+          print("yoohooo");
+          roles.sort();
+          print(roles);
+          print(map);
+          for (int i = 0; i < roles.length; i++) {
+            print("boo");
+            String role = roles[i];
+            if (role != globals.baseRole){
+              print("gone");
+              print(role);
               try{
-                print((role + " Names"));
-                print((role + " Names") == "Doctor Names");
-                List<String>.from(d["Doctor Names"]).forEach((item) => map[item] = d["Doctor"][item]);
+                List<String>.from(d[role + " Names"]).forEach((item) => map[item] = d[role][item]);
               }
               catch (e){
                 print("caught");
-                print(e);
+                // print(e);
               }
               print("bad");
-          }   
-          print(map);
-          widget.icons = map;
-          widget.keys = widget.icons.keys.toList();
-          widget.values = widget.icons.values.toList();
-        });
+              }
+            }  
+            print(map);
+            widget.icons = map;
+            widget.keys = widget.icons.keys.toList();
+            widget.values = widget.icons.values.toList();
+          });
     });
     
   }
@@ -89,11 +96,8 @@ class _HomePageState extends State<HomePage>{
  
   Widget buildRow(index){
     int end = index + widget.cols;
-    print(widget.downloadPaths);
-    print("hehee");
-    print(widget.keys);
-    end = min(end,widget.keys.length);
-    var sizedWidth = ((1 - ((1/widget.cols) * (widget.keys.length % widget.cols)))/2);
+    end = min(end,widget.values.length);
+    var sizedWidth = widget.basePadding + ((1 - ((1/widget.cols) * (end - index)))/2);
     widget.i += widget.cols;
     return base.BaseRow(index: index, keys: widget.keys.sublist(index, end), values: widget.values.sublist(index, end), fxns: widget.fxns.sublist(index, end), cols: widget.cols, rows: widget.rows, sizedWidth: sizedWidth);
   }

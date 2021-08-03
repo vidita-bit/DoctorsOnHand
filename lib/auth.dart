@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'user.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FireError {
   static bool emailError = false;
-  static String? email = null;
+  static String? email;
   static bool credError = false;
   static void setEmailError(bool err){
     emailError = err;
@@ -173,6 +173,7 @@ void createProfile(){
   String last = globals.lNameKey.currentState!.value;
   String? phone = globals.phoneKey.currentState!.value;
   String pos = globals.roleKey.currentState!.value;
+  sendRequest(pos);
   UserProfile.createUser(email,first,last,phone,pos);
 }
 
@@ -295,6 +296,20 @@ void onRegister(BuildContext context) async{
     }
   }
 
+}
+
+void sendRequest(String value){
+  print(value);
+  DocumentReference document = globals.reqCollection.doc(UserProfile.getUid());
+  print(value);
+  if (value != ""){
+    bool added = UserProfile.addRequest(value);
+    if (added){
+      document.set({
+        value + " requests": FieldValue.arrayUnion([Timestamp.now()])
+      }, SetOptions(merge: true));
+    }
+  }
 }
 
 
