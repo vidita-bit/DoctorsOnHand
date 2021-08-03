@@ -45,6 +45,7 @@ dependencies:
   flutter_google_places: ^0.3.0
   flutter_typeahead: ^3.2.0
   google_place: ^0.4.3
+  universal_html: ^2.0.8
   google_maps_flutter: ^2.0.6
 
 dev_dependencies:

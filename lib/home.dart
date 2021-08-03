@@ -97,9 +97,10 @@ class _HomePageState extends State<HomePage>{
   Widget buildRow(index){
     int end = index + widget.cols;
     end = min(end,widget.values.length);
-    var sizedWidth = widget.basePadding + ((1 - ((1/widget.cols) * (end - index)))/2);
+    var sizedWidth = ((1 - ((1/widget.cols) * (end - index)))/2);
     widget.i += widget.cols;
-    return base.BaseRow(index: index, keys: widget.keys.sublist(index, end), values: widget.values.sublist(index, end), fxns: widget.fxns.sublist(index, end), cols: widget.cols, rows: widget.rows, sizedWidth: sizedWidth);
+    print(1/widget.cols);
+    return base.BaseRow(index: index, keys: widget.keys.sublist(index, end), values: widget.values.sublist(index, end), fxns: widget.fxns.sublist(index, end), cols: widget.cols, rows: widget.rows, sizedWidth: sizedWidth, padding: widget.basePadding);
   }
 
   bool? done(){

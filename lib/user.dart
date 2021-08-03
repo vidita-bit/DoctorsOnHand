@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'globals.dart' as globals;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
+
 //check verifiedroles after registration and alphavetic insertion
 
 class UserProfile {
@@ -8,11 +11,16 @@ class UserProfile {
   static String first = "";
   static String last = "";
   static String? phone;
+  static String? imageAddress = null;
+  static bool changed = false;
   static List<String> requests = [];
   static List<String> addresses = [];
   static List<String> verifiedRoles = [];
   static var user = null;
 
+  static void setChanged(bool b){
+    changed = b;
+  }
   static void setUser(){
     user = FirebaseAuth.instance.currentUser;
   }
@@ -37,6 +45,11 @@ class UserProfile {
   static void setFName(String name){
     first = name;
   }
+  static void setImageAdd(String imageAdd){
+    print("SETTING ADDRESS");
+    print(imageAdd);
+    imageAddress = imageAdd;
+  }
   static void setLName(String name){
     last = name;
   }
@@ -57,6 +70,11 @@ class UserProfile {
   }
   static List<String> getAddresses(){
     return addresses;
+  }
+
+
+  static String? getImageAdd(){
+    return imageAddress;
   }
 
   static List<String> getVerifiedRoles(){
@@ -85,11 +103,16 @@ class UserProfile {
   static String getUid(){
     return FirebaseAuth.instance.currentUser!.uid.toString();
   }
-  static void setAll(String emailAdd, String firstName, String lastName, String? phoneNum, {List<String>? addresses = null, List<String>? verifiedRoles = null, String? role = null, List<String>? roles = null}) { 
+  static void setAll(String emailAdd, String firstName, String lastName, String? phoneNum, {String? imageAdd = null, var image = null, List<String>? addresses = null, List<String>? verifiedRoles = null, String? role = null, List<String>? roles = null}) { 
     setEmail(emailAdd);
     setFName(firstName);
     setLName(lastName);
     setNum(phoneNum);
+    if (imageAdd != null){
+      print("current address");
+      print(imageAdd);
+      setImageAdd(imageAdd);
+    }
     if (role != null && role != globals.baseRole){
       addRequest(role);
     }
@@ -102,21 +125,53 @@ class UserProfile {
     if (roles != null){
       setRequests(roles);
     }
+    print(changed);
+    print(imageAddress);
+    print(image);
+    if (changed && imageAddress != null){
+      changed = false;
+      print("DELETION");
+      globals.storage.refFromURL(imageAddress!).delete();
+      if (image == null){
+        imageAddress = null;
+        updateUser(toMap());
+      }
+    }
+    if (image != null){
+      changed = false;
+      print("UPLOAD");
+      uploadImage(image);
+    }
     print("TTHIS HAS BEEEN SET ADAM!!!!");
   }
+  static void uploadImage(var image) async{
+      Reference reference = globals.storage.ref().child("patientpics/${getUid()}/upload");
+      print(reference);
+      print(image);
+      UploadTask task = reference.putData(image!);
+      (await task).ref.getDownloadURL().then(
+        (val) {
+          print(val);
+          setImageAdd(val);
+          updateUser(toMap());
+        }
+      );
+  }
+  static void updateUser(Map<String,dynamic> map){
+      globals.userCollection.doc(getUid()).update(map).catchError((error) => print("User update failed $error"));
+  }
   static void createUser(String emailAdd, String firstName, String lastName, String? phoneNum, String pos){
-    setAll(emailAdd, firstName, lastName, phoneNum, role: pos);
+    setAll(emailAdd, firstName, lastName, phoneNum, imageAdd: imageAddress, role: pos);
     Map<String,dynamic> map = toMap();
     map["verifiedRoles"] = [];
-    map['addresses'] = [];
     globals.userCollection.doc(getUid()).set(map).catchError((error) => print("new user failed $error"));
     var timestamp = FieldValue.serverTimestamp();
-    globals.userCollection.doc(getUid()).update({"createdOn":timestamp,"usedOn":timestamp, "editedOn":timestamp}).catchError((error) => print("new user timestamp failed $error"));
+    updateUser({"createdOn":timestamp,"usedOn":timestamp, "editedOn":timestamp});
   }
 
   static Map<String,dynamic> toMap(){
     print("TOMAP");
-    return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(), "addresses": FieldValue.arrayUnion(getAddresses())};
+    return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(),"image": getImageAdd(), "addresses": getAddresses()};
   }
 
   static void userSetup(){
@@ -126,7 +181,7 @@ class UserProfile {
         print("done");
         print(getUid());
         try{
-        setAll(d['email'], d['first'], d['last'], d['phone'], roles: List<String>.from(d['requests']), addresses: List<String>.from(d['addresses']), verifiedRoles: List<String>.from(d['verifiedRoles']));
+        setAll(d['email'], d['first'], d['last'], d['phone'], imageAdd: d['image'],roles: List<String>.from(d['requests']), addresses: List<String>.from(d['addresses']), verifiedRoles: List<String>.from(d['verifiedRoles']));
         }
         catch (e){
           print("THIS HAS BEEN CAUGHT");

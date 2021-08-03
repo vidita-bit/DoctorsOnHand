@@ -189,13 +189,14 @@ class BaseLookAheadBar extends StatelessWidget {
 }
 
 class BaseBar extends StatelessWidget {
-  BaseBar({Key? key, required this.offset, this.trailing = null, this.initialValue = "", this.mode = AutovalidateMode.onUserInteraction, required this.icon, required this.hint, required this.validate, this.barKey = null, this.obscure = false}) : super(key: key);
+  BaseBar({Key? key, this.enabled = true, required this.offset, this.trailing = null, this.initialValue = "", this.mode = AutovalidateMode.onUserInteraction, required this.icon, required this.hint, required this.validate, this.barKey = null, this.obscure = false}) : super(key: key);
   final double offset;
   final String? initialValue;
   final String icon;
   final Widget? trailing;
   final String hint;
   final bool obscure;
+  final bool enabled;
   final AutovalidateMode mode;
   var barKey;
   final Function validate;
@@ -213,6 +214,7 @@ class BaseBar extends StatelessWidget {
           ),
         ),
         child: TextFormField(
+                enabled: enabled,
                 initialValue: initialValue,
                 key: barKey,
                 autovalidateMode: mode,
@@ -290,13 +292,14 @@ class BaseButton extends StatelessWidget {
 
 
 class BaseRow extends StatefulWidget {
-  BaseRow({Key? key, required this.index, required this.keys, required this.values, required this.fxns, required this.cols, required this.rows, required this.sizedWidth}) : super(key: key);
+  BaseRow({Key? key, required this.padding, required this.index, required this.keys, required this.values, required this.fxns, required this.cols, required this.rows, required this.sizedWidth}) : super(key: key);
   final int index;
   final List<String> keys;
   final List<dynamic> values;
   var fxns;
   final int cols;
   final int rows;
+  final double padding;
   int j = 0;
   var sizedWidth;
   @override
@@ -316,9 +319,9 @@ class _BaseRowState extends State<BaseRow> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget> [
-          SizedBox(width: MediaQuery.of(context).size.width * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
-          for (widget.j = 0; widget.j < widget.keys.length; widget.j++) Expanded(child: Container(width: MediaQuery.of(context).size.width * (1/widget.cols), height: MediaQuery.of(context).size.height * (1/widget.rows), child: RaisedButton(onPressed: widget.fxns[widget.j], color: Colors.transparent, child: Column(mainAxisSize: MainAxisSize.min, children: <Widget> [Expanded(flex: 5, child: Image.network(widget.values[widget.j])),Expanded(flex: 1, child: Text(widget.keys[widget.j], style: TextStyle(fontWeight: FontWeight.bold, color: globals.textColor)))])))),
-          SizedBox(width: MediaQuery.of(context).size.width * widget.sizedWidth , height: MediaQuery.of(context).size.height * (1/widget.rows)),
+          SizedBox(width: MediaQuery.of(context).size.width * (widget.sizedWidth), height: MediaQuery.of(context).size.height * (1/widget.rows)),
+          for (widget.j = 0; widget.j < widget.keys.length; widget.j++) Expanded(child: Container(width: MediaQuery.of(context).size.width , height: MediaQuery.of(context).size.height * (1/widget.rows), child: RaisedButton(onPressed: widget.fxns[widget.j], color: Colors.transparent, child: Column(mainAxisSize: MainAxisSize.min, children: <Widget> [Expanded(flex: 5, child: Image.network(widget.values[widget.j])),Expanded(flex: 1, child: Text(widget.keys[widget.j], style: TextStyle(fontWeight: FontWeight.bold, color: globals.textColor)))])))),
+          SizedBox(width: MediaQuery.of(context).size.width * (widget.sizedWidth) , height: MediaQuery.of(context).size.height * (1/widget.rows)),
           ]
         )
       );
