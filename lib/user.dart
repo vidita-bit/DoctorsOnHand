@@ -3,6 +3,7 @@ import 'globals.dart' as globals;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
+import 'db.dart';
 
 //check verifiedroles after registration and alphavetic insertion
 
@@ -158,14 +159,14 @@ class UserProfile {
       );
   }
   static void updateUser(Map<String,dynamic> map){
-    map["editedOn"] = FieldValue.serverTimeStamp();
-    globals.userCollection.doc(getUid()).update(map).catchError((error) => print("User update failed $error"));
+    map["editedOn"] = FieldValue.serverTimestamp();
+    updateDoc(map,globals.userCollection.doc(getUid()));
   }
   static void createUser(String emailAdd, String firstName, String lastName, String? phoneNum, String pos){
     setAll(emailAdd, firstName, lastName, phoneNum, imageAdd: imageAddress, role: pos);
     Map<String,dynamic> map = toMap();
     map["verifiedRoles"] = [];
-    globals.userCollection.doc(getUid()).set(map).catchError((error) => print("new user failed $error"));
+    createDoc(map,globals.userCollection.doc(getUid()));
     var timestamp = FieldValue.serverTimestamp();
     updateUser({"createdOn":timestamp,"usedOn":timestamp, "editedOn":timestamp});
   }
@@ -182,7 +183,7 @@ class UserProfile {
         print("done");
         print(getUid());
         try{
-        setAll(d['email'], d['first'], d['last'], d['phone'], imageAdd: d['image'],roles: List<String>.from(d['requests']), addresses: List<String>.from(d['addresses']), verifiedRoles: List<String>.from(d['verifiedRoles']));
+          setAll(d['email'], d['first'], d['last'], d['phone'], imageAdd: d['image'],roles: List<String>.from(d['requests']), addresses: List<String>.from(d['addresses']), verifiedRoles: List<String>.from(d['verifiedRoles']));
         }
         catch (e){
           print("THIS HAS BEEN CAUGHT");
