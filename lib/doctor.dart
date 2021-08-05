@@ -1,23 +1,34 @@
 
-class DoctorProfile{
+class Doctor{
   String? workEmail;
   String? workNum;
   String? workAddress;
   String? specialty;
-  List<dynamic> items = [workEmail,workNum,workAddress,specialty];
-  void setWorkEmail(email){
+ 
+  doctorCreate(String? mail, String? number, String? addy, String? spec){
+    setWorkEmail(mail);
+    setWorkNum(number);
+    setWorkAddress(addy);
+    setSpecialty(spec);
+  }
+
+  Doctor(var map){
+    doctorCreate(map['workEmail'],map['workNumber'],map['workAddress'],map['specialty']);
+  }
+
+  void setWorkEmail(String? email){
     workEmail = email;
   }
 
-  void setWorkNum(number){
+  void setWorkNum(String? number){
     workNum = number;
   }
 
-  void setWorkAddress(addy){
+  void setWorkAddress(String? addy){
     workAddress = addy;
   }
 
-  void setSpecialty(spec){
+  void setSpecialty(String? spec){
     specialty = spec;
   }
 
@@ -36,10 +47,14 @@ class DoctorProfile{
   String? getSpecialty(){
     return specialty;
   }
-
+  List<dynamic> getList(){
+    return [workEmail,workNum,workAddress,specialty];
+  }
   bool canList(){
     bool listable = true;
+    List<dynamic> items = getList();
     for (int i = 0; i < items.length; i++){
+      print(items[i]);
       if (items[i] == null){
         listable = false;
       }
@@ -48,7 +63,10 @@ class DoctorProfile{
   }
 
   Map<String,dynamic> toMap(Map<String,dynamic> map){
-    return  map.addAll({"workEmail": getWorkEmail(), "workNum": getWorkNum(), "workAddress": getWorkAddress(), "specialty": getSpecialty()});
+    print("BABDBABABA");
+    map.addAll({"workEmail": getWorkEmail(), "workNum": getWorkNum(), "workAddress": getWorkAddress(), "specialty": getSpecialty()});
+    print(map);
+    return map;
   }
   
 }

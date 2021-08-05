@@ -173,8 +173,8 @@ void createProfile(){
   String last = globals.lNameKey.currentState!.value;
   String? phone = globals.phoneKey.currentState!.value;
   String pos = globals.roleKey.currentState!.value;
-  sendRequest(pos);
-  UserProfile.createUser(email,first,last,phone,pos);
+  UserProfile.sendRequest(pos);
+  UserProfile.createUser(email,first,last,phone);
 }
 
 bool phoneValidate(String num){
@@ -298,19 +298,7 @@ void onRegister(BuildContext context) async{
 
 }
 
-void sendRequest(String value){
-  print(value);
-  DocumentReference document = globals.reqCollection.doc(UserProfile.getUid());
-  print(value);
-  if (value != ""){
-    bool added = UserProfile.addRequest(value);
-    if (added){
-      document.set({
-        value + " requests": FieldValue.arrayUnion([Timestamp.now()])
-      }, SetOptions(merge: true));
-    }
-  }
-}
+
 
 
 

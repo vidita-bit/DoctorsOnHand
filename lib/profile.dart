@@ -12,7 +12,7 @@ import 'dart:convert';
 import 'package:google_place/google_place.dart';
 import 'package:http/http.dart' as http;
 import 'addressManager.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 
 //change from doctor to health professional
 //verified list of roles, if role unverified mention in red text underneath with footnote
@@ -132,7 +132,7 @@ class _ProfilePageState extends State<ProfilePage>{
                               locs.add(a);
                             }
                           }
-                          UserProfile.setAll(email,first,last,number,image: widget.returnedImage, addresses: locs);
+                          UserProfile.profileUpdate(email,first,last,number,widget.returnedImage,locs);
                         })),
                       SizedBox(height: MediaQuery.of(context).size.height * 0.15, child: Row(children: <Widget> [
                         Stack(children: <Widget>[
@@ -168,7 +168,9 @@ class _ProfilePageState extends State<ProfilePage>{
                       Divider(height: MediaQuery.of(context).size.height * 0.01, thickness: MediaQuery.of(context).size.height * 0.0015, color: globals.textColor, indent: MediaQuery.of(context).size.width * 0.05, endIndent: MediaQuery.of(context).size.width * 0.05),
                       SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                       createDrop(),
-                      base.BaseBar(offset: 0.02, enabled: false, initialValue: widget.email, trailing: Icon(Icons.lock, color: Colors.white), icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailProfKey),
+                      base.BaseBar(offset: 0.02, enabled: false, initialValue: widget.email, trailing: GestureDetector(onTap: () {
+                          Fluttertoast.showToast(msg: "The registration email cannot be changed!", toastLength: Toast.LENGTH_SHORT, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, backgroundColor: Colors.white, textColor: Colors.red, fontSize: 16.0);
+                      }, child: Icon(Icons.lock, color: Colors.white)), icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailProfKey),
                       base.BaseBar(offset: 0.02, initialValue: widget.num, icon: "photos/phone.png", hint: "Phone Number", validate: auth.phoneError, barKey: globals.phoneProfKey),
                       base.BaseBar(offset: 0.02, initialValue: widget.first, icon: "photos/name.png", hint: "First Name", validate: auth.nameError, barKey: globals.fNameProfKey),
                       base.BaseBar(offset: 0.02, initialValue: widget.last, icon: "photos/name.png", hint: "Last Name",validate: auth.nameError, barKey: globals.lNameProfKey),
@@ -189,7 +191,7 @@ class _ProfilePageState extends State<ProfilePage>{
       Expanded(child: Text("I am also a", style: TextStyle(color: globals.textColor, fontSize: globals.chosenFontSize))),
       Expanded(child: base.BaseDropDown(text: widget.possibleRoles == null ? [] : widget.possibleRoles, fxn: () {},dropKey: globals.roleProfKey, mode: AutovalidateMode.disabled)),
       SizedBox(width: MediaQuery.of(context).size.width * 0.01),
-      Expanded(child: base.BaseButton(text: "SUBMIT", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () {auth.sendRequest(globals.roleProfKey.currentState!.value);}))
+      Expanded(child: base.BaseButton(text: "SUBMIT", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () {UserProfile.sendRequest(globals.roleProfKey.currentState!.value);}))
     ]));
   }
   Widget createPic(){

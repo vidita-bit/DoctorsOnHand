@@ -3,19 +3,19 @@ import 'globals.dart' as globals;
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 
-class BaseContainer extends StatelessWidget {
-  @override
-  Widget build(BuildContext context){
-    return Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(globals.background),
-            fit: BoxFit.cover,
-          )
-        ),
-    );
-  }
-}
+// class BaseContainer extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context){
+//     return Container(
+//         decoration: BoxDecoration(
+//           image: DecorationImage(
+//             image: AssetImage(globals.background),
+//             fit: BoxFit.cover,
+//           )
+//         ),
+//     );
+//   }
+// }
 
 class BaseDropDown extends StatefulWidget {
   BaseDropDown({Key? key, this.fieldName, required this.text, this.document, this.dropKey, required this.fxn, this.mode = AutovalidateMode.onUserInteraction}) : super(key: key);

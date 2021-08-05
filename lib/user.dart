@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
 import 'db.dart';
+import 'doctor.dart';
 
 //check verifiedroles after registration and alphavetic insertion
 
@@ -18,12 +19,17 @@ class UserProfile {
   static List<String> addresses = [];
   static List<String> verifiedRoles = [];
   static var user = null;
+  static Doctor? doc;
 
   static void setChanged(bool b){
     changed = b;
   }
   static void setUser(){
     user = FirebaseAuth.instance.currentUser;
+  }
+
+  static void createDoctor(var map){
+    doc = Doctor(map);
   }
 
   static void setAddresses(List<String> a){
@@ -62,6 +68,7 @@ class UserProfile {
     requests = reqs;
   }
 
+
   static bool addRequest(String request){
     if (!requests.contains(request)){
       requests.add(request);
@@ -69,11 +76,27 @@ class UserProfile {
     }
     return false;
   }
-  static List<String> getAddresses(){
+
+static void sendRequest(String value){
+    print(value);
+    DocumentReference document = globals.reqCollection.doc(getUid());
+    print(value);
+    if (value != ""){
+      bool added = addRequest(value);
+      if (added){
+        document.set({
+          value + " requests": FieldValue.arrayUnion([Timestamp.now()])
+        }, SetOptions(merge: true));
+      }
+    }
+  }
+static List<String> getAddresses(){
     return addresses;
   }
-
-
+  
+  static Doctor? getDoctor(){
+    return doc;
+  }
   static String? getImageAdd(){
     return imageAddress;
   }
@@ -104,7 +127,7 @@ class UserProfile {
   static String getUid(){
     return FirebaseAuth.instance.currentUser!.uid.toString();
   }
-  static void setAll(String emailAdd, String firstName, String lastName, String? phoneNum, {String? imageAdd = null, var image = null, List<String>? addresses = null, List<String>? verifiedRoles = null, String? role = null, List<String>? roles = null}) { 
+  static void setAll(String emailAdd, String firstName, String lastName, String? phoneNum, {var map = null, String? imageAdd = null, List<String>? addresses = null, List<String>? verifiedRoles = null, List<String>? roles = null}) { 
     setEmail(emailAdd);
     setFName(firstName);
     setLName(lastName);
@@ -114,21 +137,21 @@ class UserProfile {
       print(imageAdd);
       setImageAdd(imageAdd);
     }
-    if (role != null && role != globals.baseRole){
-      addRequest(role);
-    }
-    if (addresses != null){
-      setAddresses(addresses);
-    }
+  
     if (verifiedRoles != null){
+      setAddresses(addresses!);
+      setRequests(roles!);
       setVerifiedRoles(verifiedRoles);
+      if (verifiedRoles.contains(globals.hp)){
+        createDoctor(map!);
+      }
     }
-    if (roles != null){
-      setRequests(roles);
-    }
-    print(changed);
-    print(imageAddress);
-    print(image);
+
+    
+    print("TTHIS HAS BEEEN SET ADAM!!!!");
+  }
+  static void profileUpdate(String emailAdd, String firstName, String lastName, String? phoneNum,var image, List<String>? addresses){
+    setAll(emailAdd,firstName,lastName,phoneNum);
     if (changed && imageAddress != null){
       changed = false;
       print("DELETION");
@@ -139,11 +162,11 @@ class UserProfile {
       }
     }
     if (image != null){
+
       changed = false;
       print("UPLOAD");
       uploadImage(image);
     }
-    print("TTHIS HAS BEEEN SET ADAM!!!!");
   }
   static void uploadImage(var image) async{
       Reference reference = globals.storage.ref().child("patientpics/${getUid()}/upload");
@@ -158,12 +181,12 @@ class UserProfile {
         }
       );
   }
-  static void updateUser(Map<String,dynamic> map){
+  static void updateUser(var map){
     map["editedOn"] = FieldValue.serverTimestamp();
     updateDoc(map,globals.userCollection.doc(getUid()));
   }
-  static void createUser(String emailAdd, String firstName, String lastName, String? phoneNum, String pos){
-    setAll(emailAdd, firstName, lastName, phoneNum, imageAdd: imageAddress, role: pos);
+  static void createUser(String emailAdd, String firstName, String lastName, String? phoneNum){
+    setAll(emailAdd, firstName, lastName, phoneNum, imageAdd: imageAddress);
     Map<String,dynamic> map = toMap();
     map["verifiedRoles"] = [];
     createDoc(map,globals.userCollection.doc(getUid()));
@@ -173,7 +196,11 @@ class UserProfile {
 
   static Map<String,dynamic> toMap(){
     print("TOMAP");
-    return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(),"image": getImageAdd(), "addresses": getAddresses()};
+    var map = {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(),"image": getImageAdd(), "addresses": getAddresses()};
+    if (getDoctor() != null){
+      map = getDoctor()!.toMap(map);
+    }
+    return map;
   }
 
   static void userSetup(){
@@ -183,7 +210,7 @@ class UserProfile {
         print("done");
         print(getUid());
         try{
-          setAll(d['email'], d['first'], d['last'], d['phone'], imageAdd: d['image'],roles: List<String>.from(d['requests']), addresses: List<String>.from(d['addresses']), verifiedRoles: List<String>.from(d['verifiedRoles']));
+          setAll(d['email'], d['first'], d['last'], d['phone'], map: d, imageAdd: d['image'],roles: List<String>.from(d['requests']), addresses: List<String>.from(d['addresses']), verifiedRoles: List<String>.from(d['verifiedRoles']));
         }
         catch (e){
           print("THIS HAS BEEN CAUGHT");
