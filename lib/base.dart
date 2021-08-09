@@ -149,7 +149,7 @@ class BaseLookAheadBar extends StatelessWidget {
         child: TypeAheadFormField(
         key: barKey,
         validator: (text) {},
-        initialValue: initialValue,
+        initialValue: initialValue == null ? "" : initialValue,
         getImmediateSuggestions: false,
         textFieldConfiguration: TextFieldConfiguration(
           cursorColor: globals.textColor,
@@ -189,7 +189,7 @@ class BaseLookAheadBar extends StatelessWidget {
 }
 
 class BaseBar extends StatelessWidget {
-  BaseBar({Key? key, this.enabled = true, required this.offset, this.trailing = null, this.initialValue = "", this.mode = AutovalidateMode.onUserInteraction, required this.icon, required this.hint, required this.validate, this.barKey = null, this.obscure = false}) : super(key: key);
+  BaseBar({Key? key, this.controller = null, this.enabled = true, required this.offset, this.trailing = null, this.initialValue = null, this.mode = AutovalidateMode.onUserInteraction, required this.icon, required this.hint, required this.validate, this.barKey = null, this.obscure = false}) : super(key: key);
   final double offset;
   final String? initialValue;
   final String icon;
@@ -198,6 +198,7 @@ class BaseBar extends StatelessWidget {
   final bool obscure;
   final bool enabled;
   final AutovalidateMode mode;
+  TextEditingController? controller;
   var barKey;
   final Function validate;
   @override
@@ -214,8 +215,9 @@ class BaseBar extends StatelessWidget {
           ),
         ),
         child: TextFormField(
+                controller: controller,
                 enabled: enabled,
-                initialValue: initialValue,
+                initialValue: initialValue == null ? null : initialValue,
                 key: barKey,
                 autovalidateMode: mode,
                 obscureText: obscure,
@@ -290,7 +292,24 @@ class BaseButton extends StatelessWidget {
 
 
 
-
+class BaseDivider extends StatelessWidget{
+  BaseDivider({Key? key, this.text = null, required this.offset, this.height = 0.01, this.thickness = 0.0015, required this.color, this.indent = 0.05}) : super(key: key);
+  final double offset;
+  final double thickness;
+  final double height;
+  final double indent;
+  final Color color;
+  final String? text;
+  @override
+  Widget build(BuildContext context){
+    return Column(children: <Widget>[
+      SizedBox(height: MediaQuery.of(context).size.height * offset),
+      text != null ? BaseText(text: text!) : Container(),
+      Divider(height: MediaQuery.of(context).size.height * height, thickness: MediaQuery.of(context).size.height * thickness, color: color, indent: MediaQuery.of(context).size.width * indent, endIndent: MediaQuery.of(context).size.width * indent),
+      SizedBox(height: MediaQuery.of(context).size.height * offset),
+    ]);
+  }
+}
 class BaseRow extends StatefulWidget {
   BaseRow({Key? key, required this.padding, required this.index, required this.keys, required this.values, required this.fxns, required this.cols, required this.rows, required this.sizedWidth}) : super(key: key);
   final int index;
@@ -302,6 +321,7 @@ class BaseRow extends StatefulWidget {
   final double padding;
   int j = 0;
   var sizedWidth;
+  var width;
   @override
   _BaseRowState createState() => _BaseRowState();
 }
@@ -319,12 +339,16 @@ class _BaseRowState extends State<BaseRow> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget> [
-          SizedBox(width: MediaQuery.of(context).size.width * (widget.sizedWidth), height: MediaQuery.of(context).size.height * (1/widget.rows)),
-          for (widget.j = 0; widget.j < widget.keys.length; widget.j++) Expanded(child: Container(width: MediaQuery.of(context).size.width , height: MediaQuery.of(context).size.height * (1/widget.rows), child: RaisedButton(onPressed: widget.fxns[widget.j], color: Colors.transparent, child: Column(mainAxisSize: MainAxisSize.min, children: <Widget> [Expanded(flex: 5, child: Image.network(widget.values[widget.j])),Expanded(flex: 1, child: Text(widget.keys[widget.j], style: TextStyle(fontWeight: FontWeight.bold, color: globals.textColor)))])))),
-          SizedBox(width: MediaQuery.of(context).size.width * (widget.sizedWidth) , height: MediaQuery.of(context).size.height * (1/widget.rows)),
+          if (setWidth()) SizedBox(width: MediaQuery.of(context).size.width * (widget.sizedWidth + widget.padding), height: MediaQuery.of(context).size.height * (1/widget.rows)),
+          for (widget.j = 0; widget.j < widget.keys.length; widget.j++) Expanded(child: Container(width: widget.width * (1/widget.cols), height: MediaQuery.of(context).size.height * (1/widget.rows), child: RaisedButton(onPressed: widget.fxns[widget.j], color: Colors.transparent, child: Column(mainAxisSize: MainAxisSize.min, children: <Widget> [Expanded(flex: 5, child: Image.network(widget.values[widget.j])),Expanded(flex: 1, child: Text(widget.keys[widget.j], style: TextStyle(fontWeight: FontWeight.bold, color: globals.textColor)))])))),
+          SizedBox(width: widget.width * (widget.sizedWidth + widget.padding) , height: MediaQuery.of(context).size.height * (1/widget.rows)),
           ]
         )
       );
+  }
+  bool setWidth(){
+    widget.width = MediaQuery.of(context).size.width;
+    return true;
   }
     
 }

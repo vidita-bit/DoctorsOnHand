@@ -1,27 +1,38 @@
+import 'auth.dart' as auth;
+import 'displayCal.dart';
+import 'user.dart';
+import 'displayCal.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Doctor{
+  List<dynamic> meets = [];
+  List<Meeting> appts = [];
   String? workEmail;
   String? workNum;
   String? workAddress;
   String? specialty;
+  Doctor(this.meets, this.workEmail, this.workNum, this.workAddress, this.specialty){
+    for (int i = 0; i < meets.length; i++){
+      appts.add(Meeting.toMeeting(meets[i]));
+    }
+  }
+
+  
  
-  doctorCreate(String? mail, String? number, String? addy, String? spec){
-    setWorkEmail(mail);
-    setWorkNum(number);
-    setWorkAddress(addy);
-    setSpecialty(spec);
+  void setAppts(List<Meeting>  meetings){
+    appts = meetings;
   }
-
-  Doctor(var map){
-    doctorCreate(map['workEmail'],map['workNumber'],map['workAddress'],map['specialty']);
-  }
-
   void setWorkEmail(String? email){
-    workEmail = email;
+    if (email != null && auth.emailValidate(email)){
+      workEmail = email;
+    }
   }
 
   void setWorkNum(String? number){
-    workNum = number;
+    if (number != null && auth.phoneValidate(number)){
+        workNum = number;
+        print("YASS");
+    }
   }
 
   void setWorkAddress(String? addy){
@@ -29,9 +40,14 @@ class Doctor{
   }
 
   void setSpecialty(String? spec){
-    specialty = spec;
+    if (spec != null && auth.nameValidate(spec)){
+      specialty = spec;
+    }
   }
 
+  List<Meeting> getAppts(){
+    return appts;
+  }
   String? getWorkEmail(){
     return workEmail;
   }
@@ -47,6 +63,23 @@ class Doctor{
   String? getSpecialty(){
     return specialty;
   }
+  dynamic convertMeetings(){
+    List<dynamic> jsons = [];
+    for (int i = 0; i < appts.length; i++){
+      jsons.add(appts[i].toJson());
+    }
+
+    return {"Appts": jsons};
+  }
+
+  void saveAppts(List<Meeting>  meetings){
+    setAppts(meetings);
+   Map<String,dynamic> jsons = convertMeetings();
+    Map<String,dynamic> map = {"doctorApptEditedOn": FieldValue.serverTimestamp()};
+    map.addAll(jsons);
+    UserProfile.updateUser(map,edited:false);
+  }
+
   List<dynamic> getList(){
     return [workEmail,workNum,workAddress,specialty];
   }
@@ -62,9 +95,19 @@ class Doctor{
     return listable;
   }
 
+  void setAll(String? email, String? add, String? phone, String? spec){
+    print("SETALL");
+    print(phone);
+    setWorkEmail(email);
+    setWorkNum(phone);
+    setWorkAddress(add);
+    setSpecialty(spec);
+  }
+
+
   Map<String,dynamic> toMap(Map<String,dynamic> map){
     print("BABDBABABA");
-    map.addAll({"workEmail": getWorkEmail(), "workNum": getWorkNum(), "workAddress": getWorkAddress(), "specialty": getSpecialty()});
+    map.addAll({"doctorEditedOn": FieldValue.serverTimestamp(), "workEmail": getWorkEmail(), "workNum": getWorkNum(), "workAddress": getWorkAddress(), "specialty": getSpecialty()});
     print(map);
     return map;
   }

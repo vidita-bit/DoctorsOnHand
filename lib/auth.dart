@@ -146,11 +146,14 @@ String? nameError(String name, var key){
   if (name.length != 0){
     return null;
   }
-  String type = "first";
+  String type = "first name";
   if (key == globals.lNameKey || key == globals.lNameProfKey){
-    type = "last";
+    type = "last name";
   }
-  return "Please provide a valid " + type + " name!";
+  else if (key == globals.workSpecialtyProfKey){
+    type = "specialty";
+  }
+  return "Please provide a valid " + type;
 }
 
 String? loginError(String text,var key){
@@ -171,7 +174,7 @@ void createProfile(){
   String email = globals.emailKey.currentState!.value;
   String first = globals.fNameKey.currentState!.value;
   String last = globals.lNameKey.currentState!.value;
-  String? phone = globals.phoneKey.currentState!.value;
+  String phone = globals.phoneKey.currentState!.value == null ? "" : globals.phoneKey.currentState!.value;
   String pos = globals.roleKey.currentState!.value;
   UserProfile.sendRequest(pos);
   UserProfile.createUser(email,first,last,phone);
@@ -196,7 +199,7 @@ String? phoneError(String num, var key){
 void onReset(BuildContext context) async{
   String toast = "A reset link will be sent to your email if it is registered!";
   try {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: globals.emailResetKey.currentState!.value);
+    await globals.auth.sendPasswordResetEmail(email: globals.emailResetKey.currentState!.value);
   }
   catch (e){
     print(e);
@@ -219,7 +222,8 @@ String? roleError(String text, var key){
   }
   return "Please select a role!";
 }
-void onLogin(BuildContext context) async{
+Future<bool> onLogin(BuildContext context) async{
+  bool canLogin = false;
   bool done = true;
   for (int i = 0; i < globals.loginKeys.length; i++){
     print(globals.loginKeys[i]);
@@ -237,7 +241,7 @@ void onLogin(BuildContext context) async{
       );
       UserProfile.setUser();
       UserProfile.userSetup();
-      Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage(context: context)));
+      canLogin = true;
     }
     on FirebaseAuthException catch (e) {
       print("reached 2");
@@ -250,6 +254,7 @@ void onLogin(BuildContext context) async{
       print(e);
     }
   }
+  return canLogin;
 }
 void onRegister(BuildContext context) async{
   bool done = true;

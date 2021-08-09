@@ -5,8 +5,7 @@ import 'user.dart';
 import 'dart:core';
 import 'dart:math';
 import 'profile.dart';
-import 'listing.dart';
-
+import 'proflistings.dart';
 class HomePage extends StatefulWidget{
   HomePage({Key? key, required this.context}) : super(key: key);
   BuildContext context;
@@ -30,7 +29,7 @@ class _HomePageState extends State<HomePage>{
   @override
   void initState() {
     //better way for this needed
-    widget.fxns = [() {}, () {},() {}, () {Navigator.push(this.context, MaterialPageRoute(builder : (context) => ProfilePage()));},() {print(5);}, () {print(6);},() {print(7);}, () {print(8);}, () {Navigator.push(this.context, MaterialPageRoute(builder : (context) => MyListing(enabled: true)));}];
+    widget.fxns = [() {Navigator.push(this.context, MaterialPageRoute(builder : (context) => Listings()));}, () {Navigator.push(this.context, MaterialPageRoute(builder : (context) => ProfilePage()));},() {print(5);}, () {print(6);},() {print(7);}, () {print(8);}, () {}];
     globals.iconsDoc.get().then((d) {
       print(d.data());
       setState(() {

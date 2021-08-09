@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'base.dart' as base;
 import 'globals.dart' as globals;
 import 'user.dart';
+import 'doctor.dart';
 import 'auth.dart' as auth;
 import 'dart:math';
 import 'dart:core';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'dart:convert';
-import 'package:google_place/google_place.dart';
-import 'package:http/http.dart' as http;
+import 'listing.dart';
 import 'addressManager.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 
 //change from doctor to health professional
 //verified list of roles, if role unverified mention in red text underneath with footnote
@@ -22,9 +21,10 @@ class ProfilePage extends StatefulWidget{
   List<String> possibleRoles = [];
   final String first = UserProfile.getFName();
   final String last = UserProfile.getLName();
-  final String? num = UserProfile.getNum();
+  final String num = UserProfile.getNum();
   final String email = UserProfile.getEmail();
-  final List<String> addresses = UserProfile.getAddresses() + [""];
+  final List<String> addresses = UserProfile.getAddresses(); //+ [""];
+  final Doctor? doc = UserProfile.getDoctor();
   final AddressManager manager = AddressManager();
   int numBars = 0;
   final Color randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
@@ -65,13 +65,16 @@ class _ProfilePageState extends State<ProfilePage>{
         List<String> finalRoles = set.difference(verified.toSet()).toList();
         setState(() {
             widget.possibleRoles = ((finalRoles.length == 1 && finalRoles.contains("")) ? [] : finalRoles);
+            if (widget.addresses.length == 0){
+              widget.addresses.add("");
+            }
             widget.numBars = widget.addresses.length;
           });
     });
     super.initState();
   }
 
-  Widget bar(String address, int i){
+  Widget bar(String? address, {int? i = null, hint = "Home Address", key = null}){
     // bool add = false;
     // Icon icon = Icon(Icons.remove, color: globals.textColor);
     // if (i  == (widget.addresses.length - 1)){
@@ -82,7 +85,7 @@ class _ProfilePageState extends State<ProfilePage>{
 
     // },child: Container(width: MediaQuery.of(context).size.width * 0.01, height: MediaQuery.of(context).size.height * 0.01, decoration: BoxDecoration(color: add ? Colors.green : Colors.red, borderRadius: BorderRadius.circular(20)), child: icon));
 
-    return base.BaseBar(offset: 0.02, initialValue: address, icon: globals.address, hint: "Enter Home Address", validate: () {}, barKey: widget.manager.addKey(i));
+    return base.BaseBar(offset: 0.02, initialValue: address, icon: globals.address, hint: hint, validate: (text, key) {}, barKey: key == null ? widget.manager.addKey(i!) : key);
     // return base.BaseLookAheadBar(offset: 0.02, itemIcon: Icon(Icons.location_pin, color: Colors.black), barKey: widget.manager.addKey(i), initialValue: address, trailing: trailing, icon: Icon(Icons.location_pin, color: Colors.white), hint: "Enter Address", onChanged: (text) async {
     //   // String key = "AIzaSyDs5qT4f9iPYwO6XfZjVMd8AhVZ5IoXTH8";
     //   // var googlePlace = GooglePlace(key,proxyUrl: kIsWeb
@@ -129,8 +132,16 @@ class _ProfilePageState extends State<ProfilePage>{
                           for (int i = 0; i < keys.length; i++){
                             String a = keys[i].currentState!.value;
                             if (a.length != 0){
+                              print(a);
                               locs.add(a);
                             }
+                          }
+                          if (widget.doc != null){
+                            String? wEmail = globals.workEmailProfKey.currentState!.value;
+                            String? wAdd = globals.workAddressProfKey.currentState!.value;
+                            String? wPhone = globals.workPhoneProfKey.currentState!.value;
+                            String? wSpec = globals.workSpecialtyProfKey.currentState!.value;
+                            widget.doc!.setAll(wEmail,wAdd,wPhone,wSpec);
                           }
                           UserProfile.profileUpdate(email,first,last,number,widget.returnedImage,locs);
                         })),
@@ -163,26 +174,47 @@ class _ProfilePageState extends State<ProfilePage>{
                         ]),
                         SizedBox(width: MediaQuery.of(context).size.width * 0.2),
                         base.BaseLogo()])),
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                      base.BaseText(text: "BASIC INFORMATION"),
-                      Divider(height: MediaQuery.of(context).size.height * 0.01, thickness: MediaQuery.of(context).size.height * 0.0015, color: globals.textColor, indent: MediaQuery.of(context).size.width * 0.05, endIndent: MediaQuery.of(context).size.width * 0.05),
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                      base.BaseDivider(offset: 0.02, text: "BASIC INFORMATION", color: globals.textColor),
                       createDrop(),
-                      base.BaseBar(offset: 0.02, enabled: false, initialValue: widget.email, trailing: GestureDetector(onTap: () {
-                          Fluttertoast.showToast(msg: "The registration email cannot be changed!", toastLength: Toast.LENGTH_SHORT, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 1, backgroundColor: Colors.white, textColor: Colors.red, fontSize: 16.0);
-                      }, child: Icon(Icons.lock, color: Colors.white)), icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailProfKey),
+                      base.BaseBar(offset: 0.02, enabled: false, initialValue: widget.email, trailing: Icon(Icons.lock, color: Colors.white), icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailProfKey),
                       base.BaseBar(offset: 0.02, initialValue: widget.num, icon: "photos/phone.png", hint: "Phone Number", validate: auth.phoneError, barKey: globals.phoneProfKey),
                       base.BaseBar(offset: 0.02, initialValue: widget.first, icon: "photos/name.png", hint: "First Name", validate: auth.nameError, barKey: globals.fNameProfKey),
                       base.BaseBar(offset: 0.02, initialValue: widget.last, icon: "photos/name.png", hint: "Last Name",validate: auth.nameError, barKey: globals.lNameProfKey),
-                      for (int i = 0; i < widget.numBars; i++) bar(widget.addresses[i], i),
-           
+                      for (int i = 0; i < widget.numBars; i++) bar(widget.addresses[i], i: i),
+                      addMedicalInfo(context),
+                      SizedBox( 
+                        width: MediaQuery.of(context).size.width * 0.1,
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        child: base.BaseButton(text: "LOG OUT", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () async {
+                          await globals.auth.signOut();
+                          UserProfile.logOut();
+                          Navigator.popUntil(context, ModalRoute.withName("/"));
+                        })),
               ]
             )]
           )
         )
       );
   }
+  Widget addMedicalInfo(BuildContext context){
+    return widget.doc == null ? Container() : Column(
+      children: <Widget> [
+            base.BaseDivider(offset: 0.02, text: "LISTING INFORMATION", color: globals.textColor),
+            base.BaseBar(offset: 0.02, initialValue: widget.doc!.getWorkAddress(), icon: globals.email, hint: "Work " + globals.emailHint, validate: auth.emailError, barKey: globals.workEmailProfKey),
+            base.BaseBar(offset: 0.02, initialValue: widget.doc!.getWorkNum(), icon: "photos/phone.png", hint: "Work Number", validate: auth.phoneError, barKey: globals.workPhoneProfKey),
+            base.BaseBar(offset: 0.02, initialValue: widget.doc!.getSpecialty(), icon: globals.dicon, hint: "Specialty", validate: auth.nameError, barKey: globals.workSpecialtyProfKey),
+            bar(widget.doc!.getWorkAddress(), key: globals.workAddressProfKey, hint: "Office Address"),
+            SizedBox( 
+                        width: MediaQuery.of(context).size.width * 0.1,
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        child: base.BaseButton(text: "Schedule Appointments", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () {Navigator.push(context,MaterialPageRoute(builder : (context) => MyListing(doc: widget.doc!)));})
+                        ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
+      ]
+    );
+
+  }
   Widget createDrop(){
     if (widget.possibleRoles.length == 0){
       return Container();
