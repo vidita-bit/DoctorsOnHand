@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'globals.dart' as globals;
-import 'displayCal.dart';
+import 'calendar.dart';
 import 'doctor.dart';
-class MyListing extends StatefulWidget{
-  MyListing({Key? key, required this.doc}) : super(key: key);
+class Calendar extends StatefulWidget{
+  Calendar({Key? key, required this.doc}) : super(key: key);
   Doctor doc;
   @override
-  _MyListingState createState() => _MyListingState();
+  _CalendarState createState() => _CalendarState();
 }
 
-class _MyListingState extends State<MyListing>{
+class _CalendarState extends State<Calendar>{
   
   @override
   Widget build(BuildContext context){

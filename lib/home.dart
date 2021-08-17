@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage>{
           widget.basePadding = grid["lateralPadding"];
           Map<String, String> map = {};
           List<String>.from(d[globals.baseRole + " Names"]).forEach((item) => map[item] = d[globals.baseRole][item]);
-          List<String> roles = UserProfile.getVerifiedRoles();
+          List<String> roles = globals.user.getVerifiedRoles();
           print("yoohooo");
           roles.sort();
           print(roles);

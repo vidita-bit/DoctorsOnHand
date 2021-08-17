@@ -10,79 +10,88 @@ import 'doctor.dart';
 //check verifiedroles after registration and alphavetic insertion
 
 class UserProfile {
-  static String email = "";
-  static String first = "";
-  static String last = "";
-  static String phone = "";
-  static String? imageAddress = null;
-  static bool changed = false;
-  static List<String> requests = [];
-  static List<String> addresses = [];
-  static List<String> verifiedRoles = [];
-  static var user = null;
-  static Doctor? doc;
-  static String? uid = null;
+  String email = "";
+  String first = "";
+  String last = "";
+  String phone = "";
+  String? imageAddress;
+  bool changed = false;
+  List<String> requests;
+  List<String> addresses;
+  List<String> verifiedRoles;
+  var user = null;
+  String? uid = null;
+  bool doctor;
 
-  static void setChanged(bool b){
+  UserProfile(this.email,this.first,this.last,this.phone,this.imageAddress, this.requests, this.addresses, this.verifiedRoles, this.doctor);
+
+  static void createUser(String emailAdd, String firstName, String lastName, String phoneNum){
+    globals.user = UserProfile(emailAdd, firstName, lastName, phoneNum,null,[],[],[],false);
+    globals.user.setUser();
+    Map<String,dynamic> map = globals.user.toMap();
+    createDoc(map,globals.userCollection.doc(globals.user.getUid()));
+    var timestamp = FieldValue.serverTimestamp();
+    globals.user.updateUser({"createdOn":timestamp,"usedOn":timestamp, "editedOn":timestamp});
+  }
+
+  void setChanged(bool b){
     changed = b;
   }
-  static void setUser(){
+  void setUser(){
     user = globals.auth.currentUser;
     uid = globals.auth.currentUser!.uid.toString();
   }
 
-  static void createDoctor(var map){
-    print("DOCTORINO CRREATED");
-    doc = Doctor(map["Appts"], map['workEmail'],map['workNum'], map['workAddress'], map['specialty']);
-    print(doc);
-  }
+ 
 
-  static void setAddresses(List<String> a){
+  void setAddresses(List<String> a){
     addresses = a;
   }
-  static void addAddress(String address){
+  void addAddress(String address){
     addresses.add(address);
   }
 
-  static void setVerifiedRoles(List<String> roles){
+  void setVerifiedRoles(List<String> roles){
     verifiedRoles = roles;
   }
-  static void addVerifiedRole(String role){
+  void addVerifiedRole(String role){
     verifiedRoles.add(role);
   }
-  static void setEmail(String emailAdd){
+  void setEmail(String emailAdd){
     if (auth.emailValidate(emailAdd)){
       email = emailAdd;
     }
   }
 
-  static void setFName(String name){
+  void setFName(String name){
+    print(name);
+    print(auth.nameValidate(name));
     if (auth.nameValidate(name)){
       first = name;
     }
   }
-  static void setImageAdd(String imageAdd){
+  void setImageAdd(String imageAdd){
     print("SETTING ADDRESS");
     print(imageAdd);
     imageAddress = imageAdd;
   }
-  static void setLName(String name){
+  void setLName(String name){
     if (auth.nameValidate(name)){
       last = name;
     }
   }
-  static void setNum(String number){
+  void setNum(String number){
     if (auth.phoneValidate(number)){
       phone = number;
     }
   }
 
-  static void setRequests(List<String> reqs){
+  void setRequests(List<String> reqs){
     requests = reqs;
   }
 
 
-  static bool addRequest(String request){
+  bool addRequest(String request){
     if (!requests.contains(request)){
       requests.add(request);
       return true;
@@ -90,7 +99,7 @@ class UserProfile {
     return false;
   }
 
-static void sendRequest(String value){
+void sendRequest(String value){
     print(value);
     DocumentReference document = globals.reqCollection.doc(getUid());
     print(value);
@@ -103,46 +112,44 @@ static void sendRequest(String value){
       }
     }
   }
-static List<String> getAddresses(){
+ List<String> getAddresses(){
     return addresses;
   }
   
-  static Doctor? getDoctor(){
-    print("getting");
-    print(doc);
-    return doc;
+  bool isDoc(){
+    return doctor;
   }
-  static String? getImageAdd(){
+  String? getImageAdd(){
     return imageAddress;
   }
 
-  static List<String> getVerifiedRoles(){
+  List<String> getVerifiedRoles(){
     return verifiedRoles;
   }
-  static String getEmail(){
+  String getEmail(){
     print("THIS");
     return email;
   }
-  static String getFName(){
+  String getFName(){
     return first;
   }
-  static String getLName(){
+  String getLName(){
     return last;
   }
-  static String getNum(){
+  String getNum(){
     return phone;
   }
-  static User getUser(){
+  User getUser(){
     print(user);
     return user;
   }
-  static List<String> getRequests(){
+  List<String> getRequests(){
     return requests;
   }
-  static String getUid(){
+  String getUid(){
     return uid!;
   }
-  static void setAll(String emailAdd, String firstName, String lastName, String phoneNum, {var map = null, List<String>? addresses = null, String? imageAdd = null, List<String>? verifiedRoles = null, List<String>? roles = null}) { 
+  void setAll(String emailAdd, String firstName, String lastName, String phoneNum, {List<String>? addresses = null}) { 
     setEmail(emailAdd);
     setFName(firstName);
     setLName(lastName);
@@ -150,24 +157,11 @@ static List<String> getAddresses(){
     if (addresses != null){
       setAddresses(addresses);
     }
-    if (imageAdd != null){
-      print("current address");
-      print(imageAdd);
-      setImageAdd(imageAdd);
-    }
-  
-    if (verifiedRoles != null){
-      setRequests(roles!);
-      setVerifiedRoles(verifiedRoles);
-      if (verifiedRoles.contains(globals.hp)){
-        createDoctor(map!);
-      }
-    }
 
     
     print("TTHIS HAS BEEEN SET ADAM!!!!");
   }
-  static void profileUpdate(String emailAdd, String firstName, String lastName, String phoneNum,var image, List<String> addresses){
+  void profileUpdate(String emailAdd, String firstName, String lastName, String phoneNum,var image, List<String> addresses){
     bool updated = false;
     setAll(emailAdd,firstName,lastName,phoneNum, addresses: addresses);
     if (changed && imageAddress != null){
@@ -191,13 +185,12 @@ static List<String> getAddresses(){
       updateUser(toMap());
     }
   }
-  static void logOut(){
+  void logOut(){
     updateUser({"loggedOutOn": FieldValue.serverTimestamp()}, edited: false);
   }
-  static void uploadImage(var image) async{
+  void uploadImage(var image) async{
       Reference reference = globals.storage.ref().child("patientpics/${getUid()}/upload");
       print(reference);
-      print(image);
       UploadTask task = reference.putData(image!);
       (await task).ref.getDownloadURL().then(
         (val) {
@@ -207,39 +200,36 @@ static List<String> getAddresses(){
         }
       );
   }
-  static void updateUser(var map, {bool edited = true}){
+  void updateUser(var map, {bool edited = true}){
     if (edited){
       map["editedOn"] = FieldValue.serverTimestamp();
     }
     print(map);
     updateDoc(map,globals.userCollection.doc(getUid()));
   }
-  static void createUser(String emailAdd, String firstName, String lastName, String phoneNum){
-    setAll(emailAdd, firstName, lastName, phoneNum, imageAdd: imageAddress);
-    Map<String,dynamic> map = toMap();
-    map["verifiedRoles"] = [];
-    createDoc(map,globals.userCollection.doc(getUid()));
-    var timestamp = FieldValue.serverTimestamp();
-    updateUser({"createdOn":timestamp,"usedOn":timestamp, "editedOn":timestamp});
-  }
+ 
 
-  static Map<String,dynamic> toMap(){
+  Map<String,dynamic> toMap(){
     print("TOMAP");
-    var map = {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(),"image": getImageAdd(), "addresses": getAddresses()};
-    if (getDoctor() != null){
-      map = getDoctor()!.toMap(map);
-    }
-    return map;
+    return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(),"image": getImageAdd(), "addresses": getAddresses(), "verifiedRoles": getVerifiedRoles()};
+   
   }
 
   static void userSetup(){
       print("THIS WAS CALLED");
-      globals.userCollection.doc(getUid()).update({"usedOn":FieldValue.serverTimestamp()}).catchError((error) => print("getting user failed $error"));
-      globals.userCollection.doc(getUid()).get().then((d) {
-      print(getUid());
+      String uid = globals.auth.currentUser!.uid.toString();
+      globals.userCollection.doc(uid).update({"usedOn":FieldValue.serverTimestamp()}).catchError((error) => print("getting user failed $error"));
+      globals.userCollection.doc(uid).get().then((d) {
+      print(uid);
       print(d.data());
-      setAll(d['email'], d['first'], d['last'], d['phone'], map: d, imageAdd: d['image'],roles: List<String>.from(d['requests']), addresses: List<String>.from(d['addresses']), verifiedRoles: List<String>.from(d['verifiedRoles']));
-        
+      List<String> verified = List<String>.from(d['verifiedRoles']);
+      if (verified.contains(globals.hp)){
+        globals.user = Doctor(d['email'], d['first'], d['last'], d['phone'], d['image'],List<String>.from(d['requests']), List<String>.from(d['addresses']), verified, d["Appts"], d['workEmail'],d['workNum'], d['workAddress'], d['specialty']);
+      }
+      else{
+        globals.user = UserProfile(d['email'], d['first'], d['last'], d['phone'], d['image'], List<String>.from(d['requests']), List<String>.from(d['addresses']), verified, false);
+      }
+        globals.user.setUser();
       });
   }
 

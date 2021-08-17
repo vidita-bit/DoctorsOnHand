@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'user.dart';
+//same day 
+//back button same as press
+//last login
 List<Color> colorCollection = [Color(0xFF0F8644),Color(0xFF8B1FA9),Color(0xFFD20100),Color(0xFFFC571D),Color(0xFF85461E), Color(0xFFFF00FF),Color(0xFF3D4FB5),Color(0xFFE47C73),Color(0xFF636363)];
-List<String> colorNames = ["Green", "Purple", "Red","Orange", "Caramel", "Mmagenta","Blue","Peach","Gray"];
+List<String> colorNames = ["Green", "Purple", "Red","Orange", "Caramel", "Magenta","Blue","Peach","Gray"];
 
-
+var user;
 final String apiKey = "AIzaSyCr7jn8bWfmolToBtrxDhAChpe8fy0MQ_4";
 final String textBackground = "photos/trans.png";
 final String background = "photos/bg.jpg";
@@ -30,7 +33,7 @@ final FirebaseAuth auth = FirebaseAuth.instance;
 final FirebaseStorage storage = FirebaseStorage.instance;
 final FirebaseFirestore firestore = FirebaseFirestore.instance;
 final CollectionReference indexCollection = firestore.collection("Indexes");
-final DocumentReference doctorIndexdoc = indexCollection.doc(hp);
+final DocumentReference doctorIndexDoc = indexCollection.doc(hp);
 final CollectionReference userCollection = firestore.collection("Users");
 final CollectionReference reqCollection = firestore.collection("Requests");
 final CollectionReference adminCollection = firestore.collection("Admin");

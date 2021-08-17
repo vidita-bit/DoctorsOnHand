@@ -1,333 +1,169 @@
-part of event_calendar;
+//https://github.com/SyncfusionExamples/scheduling-events-flutter-calendar/blob/master/lib/color-picker.dart
+library event_calendar;
 
-/*
-Methods needed:
-
-1) get all events from db, then store into list
-2) Return all events
-3) load all events into calendar
-4) add event to calendar
-5) Repeat event daily, weekly, monthly and every x days/weeks/months
-6) Range of times with given increment
-
-*/
-class Meeting {
-  Meeting({required this.from, required this.inPerson, required this.onCall, required this.to,this.background = Colors.green, this.eventName = '', this.description = ''});
-
-  final String eventName;
-  final DateTime from;
-  final DateTime to;
-  final Color background;
-  final bool inPerson;
-  final bool onCall;
-  final String description;
-
-  dynamic toJson(){
-    return {"eventName": eventName, "from": from.toIso8601String(), "to": to.toIso8601String(), "color": globals.colorCollection.indexOf(background), "inPerson": inPerson, "onCall": onCall, "description": description};
-  }
-  
-  static Meeting toMeeting(dynamic map){
-    return Meeting(eventName: map["eventName"], from: DateTime.parse(map["from"]), to: DateTime.parse(map["to"]), background: globals.colorCollection[map["color"]], inPerson: map["inPerson"], onCall: map["onCall"], description: map["description"]);
-  }
-}
-
-class DataSource extends CalendarDataSource {
-  DataSource({required this.appointments});
-
-  final List<Meeting> appointments;
-
-  List<Meeting> getAppointments(){
-    return appointments;
-  }
-  @override
-  String getSubject(int index) => appointments[index].eventName;
-
-  @override
-  String getNotes(int index) => appointments[index].description;
-
-  @override
-  Color getColor(int index) => appointments[index].background;
-
-  @override
-  DateTime getStartTime(int index) => appointments[index].from;
-
-  @override
-  DateTime getEndTime(int index) => appointments[index].to;
-}
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:intl/intl.dart';
+import 'dart:core';
+import "package:flutter/scheduler.dart";
+import 'globals.dart' as globals;
+import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'base.dart' as base;
+import 'doctor.dart';
+part 'colorPicker.dart';
+part 'calendarHelper.dart';
 
 
 
-class AppointmentEditor extends StatefulWidget{
-  AppointmentEditor({Key? key, required this.doc}) : super(key: key);
+int _selectedColorIndex = 0;
+
+late DataSource _events;
+Meeting? _selectedAppointment;
+late DateTime _startDate;
+late TimeOfDay _startTime;
+late DateTime _endDate;
+late TimeOfDay _endTime;
+bool _inPerson = false;
+bool _onCall = false;
+String _title = '';
+String _headerFormat = 'MMMM yy';
+String _notes = '';
+
+class EventCalendar extends StatefulWidget {
+  EventCalendar({Key? key, required this.doc}) : super(key: key);
   Doctor doc;
   @override
-  _AppointmentEditorState createState() => _AppointmentEditorState();
-
+  EventCalendarState createState() => EventCalendarState();
 }
-class _AppointmentEditorState extends State<AppointmentEditor>{
-  @override
-  Widget build(BuildContext context){
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(getTitle()),
-          backgroundColor: globals.colorCollection[_selectedColorIndex],
-          leading: IconButton(icon: Icon(Icons.close, color: Colors.white), onPressed: () {Navigator.pop(context);}),
-          actions: <Widget>[
-            IconButton(
-              padding: EdgeInsets.fromLTRB(5,0,5,0),
-              icon: Icon(Icons.done, color: Colors.white),
-              onPressed: () {
-                final List<Meeting> meetings = [];
-                if (_selectedAppointment != null){
-                  _events.appointments.removeAt(_events.appointments.indexOf(_selectedAppointment!));
-      
-                  _events.notifyListeners(CalendarDataSourceAction.remove,  <Meeting>[]..add(_selectedAppointment!));
-                }
-                meetings.add(Meeting(
-                  from: _startDate,
-                  to: _endDate,
-                  background: globals.colorCollection[_selectedColorIndex],
-                  description: _notes,
-                  inPerson: _inPerson,
-                  onCall: _onCall,
-                  eventName: _title == "" ? "(No title)" : _title
-                ));
 
-                _events.appointments.add(meetings[0]);
-                _events.notifyListeners(CalendarDataSourceAction.add, meetings);
-                _selectedAppointment = null;
-                Navigator.pop(context);
-              }
-            )
-          ],
-        ),
-        body: Padding(
-          padding: EdgeInsets.all(5),
-          child: Stack(
-            children: <Widget>[
-              _getAppointmentEditor(context)
-            ],
-          )
-        ),
-      floatingActionButton: _selectedAppointment == null ? Text("") : FloatingActionButton(onPressed: (){
-        if (_selectedAppointment != null){
-          _events.appointments.removeAt(_events.appointments.indexOf(_selectedAppointment!));
-          _events.notifyListeners(CalendarDataSourceAction.remove,<Meeting>[]..add(_selectedAppointment!));
-          _selectedAppointment = null;
-          Navigator.pop(context);
-        }
-      },
-      child: Icon(Icons.delete_outline, color: Colors.white),
-      backgroundColor: Colors.red,
-      )
-    ),
-  );
+
+class EventCalendarState extends State<EventCalendar> {
+  // EventCalendarState();
+  CalendarView _calendarView = CalendarView.month;
+  late List<Meeting> appointments;
+
+  @override 
+  void initState(){
+    appointments = widget.doc.getAppts();
+    _events = DataSource(appointments: appointments);
+    _selectedAppointment = null;
+    _selectedColorIndex = 0;
+    _title = '';
+    _notes = '';
+
     
+    super.initState();
   }
-  String getTitle(){
-    return _title.isEmpty ? "New event" : "Event details";
-  }
-  Widget _getAppointmentEditor(BuildContext context){
-    return Container(
-      color: Colors.white,
-      child: ListView(
-        // padding: EdgeInsets.all(0),
-        children: <Widget>[
-          ListTile(
-            contentPadding: EdgeInsets.fromLTRB(5, 0, 5, 5),
-            leading: Text(""),
-            title: TextField(
-              controller: TextEditingController(text: _title),
-              onChanged: (String value) {_title = value;},
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              style: TextStyle(
-                fontSize: globals.chosenFontSize + 5,
-                color: Colors.black,
-                fontWeight: FontWeight.w400
-              ),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: "Add Title"
-              ),
-          ),
-          ),
-          Divider(height: 1, thickness: 1),
-          ListTile(
-            contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
-            leading: Icon(Icons.access_time, color: Colors.black54),
-            title: Row(children: <Widget>[
-              Expanded(child: Text("In person accepted")),
-              Expanded(child: Align(
-                alignment: Alignment.centerRight,
-                child: Switch(
-                  value: _inPerson,
-                  onChanged: (bool value) {setState(() {_inPerson = value;});},
-                )
-              )
-              ),
-            ])),
-             ListTile(
-            contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
-            leading: Icon(Icons.access_time, color: Colors.black54),
-            title: Row(children: <Widget>[
-              Expanded(child: Text("Calls accepted")),
-              Expanded(child: Align(
-                alignment: Alignment.centerRight,
-                child: Switch(
-                  value: _onCall,
-                  onChanged: (bool value) {setState(() {_onCall = value;});},
-                )
-              )
-              ),
-            ])),
-            
-          ListTile(
-            contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
-            leading: Text(""),
-            title: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Expanded(flex: 7, child: GestureDetector(
-                  onTap: () async {
-                    var now = DateTime.now();
-                    final DateTime? date = await showDatePicker(
-                      context: context,
-                      initialDate: _startDate,
-                      firstDate: DateTime(now.year, now.month, now.day),
-                      lastDate: DateTime(now.year, now.month + 1, now.day)
-                      );
-                    if (date != null && date != _startDate){
-                      setState(() {
-                        final Duration difference = _endDate.difference(_startDate);
-                        _startDate = DateTime(date.year,date.month,date.day,_startTime.hour,_startTime.minute,0);
-                        _endDate = _startDate.add(difference);
-                        _endTime = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
-                      });
-                    }
-                  },
-                  child: Text(DateFormat("EEE, MMM dd yyyy").format(_startDate), textAlign: TextAlign.left),
-                  )
-                ),
-                Expanded(
-                  flex: 3,
-                  child: GestureDetector(child: Text(
-                    DateFormat("hh:mm a").format(_startDate),
-                    textAlign: TextAlign.right,
-                    ),
-                  onTap: () async {
-                    final TimeOfDay? time = await showTimePicker(
-                      context: context,
-                       initialTime: TimeOfDay(
-                         hour: _startTime.hour,
-                         minute: _startTime.minute
-                       )
-                    );
 
-                    if (time != null && time != _startTime){
-                      setState(() {
-                        _startTime = time;
-                        final Duration difference = _endDate.difference(_startDate);
-                        _startDate = DateTime(_startDate.year,_startDate.month, _startDate.day, _startTime.hour, _startTime.minute,0);
-                        _endDate = _startDate.add(difference);
-                        _endTime = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
-                      });
-                    }
-                  },
-                  ),
-                ),
-              ]),
-          ),
-          ListTile(
-              contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
-              leading: Text(""),
-              title: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(flex: 7, child: GestureDetector(
-                    onTap: () async {
-                      var now = DateTime.now();
-                      final DateTime? date = await showDatePicker(
-                        context: context,
-                        initialDate: _endDate,
-                        firstDate: DateTime(now.year, now.month, now.day),
-                        lastDate: DateTime(now.year, now.month + 1, now.day)
-                        );
-                      if (date != null && date != _endDate){
-                        setState(() {
-                          final Duration difference = _endDate.difference(_startDate);
-                          _endDate = DateTime(date.year,date.month,date.day,_startTime.hour,_startTime.minute,0);
-                          if (_endDate.isBefore(_startDate)){
-                            _startDate = _endDate.subtract(difference);
-                            _startTime = TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
-                          }
-                        });
-                      }
-                    },
-                    child: Text(DateFormat("EEE, MMM dd yyyy").format(_endDate), textAlign: TextAlign.left),
-                    )
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: GestureDetector(child: Text(
-                      DateFormat("hh:mm a").format(_endDate),
-                      textAlign: TextAlign.right,
-                      ),
-                    onTap: () async {
-                      final TimeOfDay? time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay(
-                          hour: _endTime.hour,
-                          minute: _endTime.minute
-                        )
-                      );
-
-                      if (time != null && time != _endTime){
-                        setState(() {
-                          _endTime = time;
-                          final Duration difference = _endDate.difference(_startDate);
-                          _endDate = DateTime(_endDate.year,_endDate.month, _endDate.day, _endTime.hour, _endTime.minute,0);
-                          if (_endDate.isBefore(_startDate)){
-                            _startDate = _endDate.subtract(difference);
-                            _startTime = TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
-                          }
-                        });
-                      }
-                    },
-                    ),
-                  ),
-                ]),
-            ),  
-            ListTile(
-              contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
-              leading: Icon(Icons.lens, color: globals.colorCollection[_selectedColorIndex]),
-              title: Text(globals.colorNames[_selectedColorIndex]),
-              onTap: () {
-                showDialog<Widget>(
-                  context: context,
-                  barrierDismissible: true,
-                  builder: (BuildContext context){
-                    return _ColorPicker();
-                  },
-                  ).then((value) => setState(() {}));
-              },
-            ),
-            Divider(height: 1, thickness: 1),
-            ListTile(
-              contentPadding: EdgeInsets.all(5),
-              leading: Icon(Icons.subject, color: Colors.black87),
-              title: TextField(
-                controller: TextEditingController(text: _notes),
-                onChanged: (String value) {_notes = value;},
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                style: TextStyle(fontSize: globals.chosenFontSize, color: Colors.black87, fontWeight: FontWeight.w400),
-                decoration: InputDecoration(border: InputBorder.none, hintText: "Add description")
-              )
-            ),
-            Divider(height: 1, thickness: 1)
-      ])
-    );
+  @override 
+  Widget build(BuildContext context){
+    return Column(children:<Widget> [
+    Align(alignment: Alignment.topLeft, child: BackButton(color: Colors.white, onPressed: () {
+        widget.doc.saveAppts(_events.getAppointments());
+        Navigator.pop(context);
+      })),
+    base.BaseLogo(), 
+    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+    Center(child: Container(
+      width: MediaQuery.of(context).size.width * 0.75,
+      height: MediaQuery.of(context).size.height * 0.75,
+      child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Padding(
+              padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
+              child: getEventCalendar(_calendarView, _events, onCalendarTapped)))))]);
   }
+  
+
+  SfCalendar getEventCalendar(CalendarView _calendarView, CalendarDataSource _calendarDataSource,CalendarTapCallback calendarTapCallback) {
+    var now = DateTime.now();
+    return SfCalendar(
+        minDate: DateTime(now.year - 1, now.month, now.day, 0 , 0, 0),
+        maxDate: DateTime(now.year + 1, now.month, now.day, 0 , 0, 0),
+        view: _calendarView,
+        showDatePickerButton: true,
+        headerDateFormat: _headerFormat,
+        allowedViews: [
+          CalendarView.day,
+          CalendarView.week,
+          CalendarView.workWeek,
+          CalendarView.month,
+          CalendarView.timelineDay,
+          CalendarView.timelineWeek,
+          CalendarView.timelineWorkWeek,
+          CalendarView.timelineMonth,
+          CalendarView.schedule
+        ],
+        dataSource: _calendarDataSource,
+        onTap: calendarTapCallback,
+        onViewChanged: viewChanged,
+        initialDisplayDate: DateTime(DateTime.now().year, DateTime.now().month,
+            DateTime.now().day, 0, 0, 0),
+        monthViewSettings: MonthViewSettings(
+            appointmentDisplayMode: MonthAppointmentDisplayMode.appointment),
+        timeSlotViewSettings: TimeSlotViewSettings(
+            minimumAppointmentDuration:  Duration(minutes: 10)));
+  }
+
+ void viewChanged(ViewChangedDetails viewChangedDetails) {
+  if (_calendarView == CalendarView.day) {
+    _headerFormat = 'yyy MMM';
+  } else if (_calendarView == CalendarView.week ||
+      _calendarView == CalendarView.workWeek ||
+     _calendarView == CalendarView.timelineDay ||
+      _calendarView == CalendarView.timelineMonth) {
+    _headerFormat = 'MMM yyy';
+  } else if (_calendarView == CalendarView.month) {
+    _headerFormat = 'MMMM yy';
+  } else if (_calendarView == CalendarView.timelineWeek ||
+      _calendarView== CalendarView.timelineWorkWeek) {
+    _headerFormat = 'MMM yy';
+  } else {
+    _headerFormat = 'yyy';
+  }
+  SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+    setState(() {
+ 
+      });
+    });
+  }
+
+  void onCalendarTapped(CalendarTapDetails calendarTapDetails) {
+    if (calendarTapDetails.targetElement != CalendarElement.calendarCell &&
+        calendarTapDetails.targetElement != CalendarElement.appointment) {
+      return;
+    }
+
+    setState(() {
+      _selectedAppointment = null;
+      _selectedColorIndex = 0;
+      _title = '';
+      _notes = '';
+      if (_calendarView == CalendarView.month) {
+        _calendarView = CalendarView.day;
+      } else {
+        if (calendarTapDetails.appointments != null && calendarTapDetails.appointments!.length == 1) {
+          final Meeting meetingDetails = calendarTapDetails.appointments![0];
+          _startDate = meetingDetails.from;
+          _endDate = meetingDetails.to;
+          _selectedColorIndex = globals.colorCollection.indexOf(meetingDetails.background);
+          _title = meetingDetails.eventName == '(No title)' ? '' : meetingDetails.eventName;
+          _notes = meetingDetails.description;
+          _inPerson = meetingDetails.inPerson;
+          _onCall = meetingDetails.onCall;
+          _selectedAppointment = meetingDetails;
+        } else {
+          final DateTime date = calendarTapDetails.date!;
+          _startDate = date;
+          _endDate = date.add(Duration(hours: 1));
+        }
+        _startTime = TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
+        _endTime = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
+        Navigator.push<Widget>(context,MaterialPageRoute(builder: (BuildContext context) => AppointmentEditor(doc: widget.doc)),
+        );
+      }
+    });
+  }
+
 }
+  

@@ -136,7 +136,7 @@ String? emailError(String email, var key){
 
 
 bool nameValidate(String name){
-  if (name != ""){
+  if (name.length == 0){
     return false;
   }
   return true;
@@ -176,8 +176,8 @@ void createProfile(){
   String last = globals.lNameKey.currentState!.value;
   String phone = globals.phoneKey.currentState!.value == null ? "" : globals.phoneKey.currentState!.value;
   String pos = globals.roleKey.currentState!.value;
-  UserProfile.sendRequest(pos);
   UserProfile.createUser(email,first,last,phone);
+  globals.user.sendRequest(pos);
 }
 
 bool phoneValidate(String num){
@@ -239,7 +239,6 @@ Future<bool> onLogin(BuildContext context) async{
         email: globals.emailLoginKey.currentState!.value,
         password: globals.passLoginKey.currentState!.value
       );
-      UserProfile.setUser();
       UserProfile.userSetup();
       canLogin = true;
     }
@@ -276,12 +275,11 @@ void onRegister(BuildContext context) async{
         email: email,
         password: globals.passKey.currentState!.value
       );
-      UserProfile.setUser();
       createProfile();
       print("DOne");
       String toast = "Please check your email and verify it!";
-      if (!UserProfile.getUser().emailVerified){
-        UserProfile.getUser().sendEmailVerification();
+      if (!globals.user.getUser().emailVerified){
+        globals.user.getUser().sendEmailVerification();
       }
       else{
         toast = "Email already verified!";

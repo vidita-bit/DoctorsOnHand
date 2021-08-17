@@ -9,7 +9,7 @@ import 'auth.dart' as auth;
 import 'globals.dart' as globals;
 import 'base.dart' as base;
 import 'package:flutter/scheduler.dart';
-
+import 'doctorController.dart';
 
 //information icon
 //user created, user last log in dates, last modification
@@ -32,6 +32,7 @@ Future<void> main() async {
   print("main runs");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  DoctorController controller = DoctorController();
   User? user = FirebaseAuth.instance.currentUser;
   runApp(MyApp(user: user));
 }
@@ -50,7 +51,6 @@ class MyApp extends StatelessWidget {
 
   Widget chooseWidget(BuildContext context){
     if (globals.auth.currentUser != null){
-      UserProfile.setUser();
       UserProfile.userSetup();
       return LoginPage(enabled: true); 
     }

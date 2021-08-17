@@ -9,7 +9,7 @@ import 'dart:core';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'listing.dart';
+import 'displayCalendar.dart';
 import 'addressManager.dart';
 
 
@@ -19,19 +19,18 @@ import 'addressManager.dart';
 class ProfilePage extends StatefulWidget{
   ProfilePage({Key? key}) : super(key: key);
   List<String> possibleRoles = [];
-  final String first = UserProfile.getFName();
-  final String last = UserProfile.getLName();
-  final String num = UserProfile.getNum();
-  final String email = UserProfile.getEmail();
-  final List<String> addresses = UserProfile.getAddresses(); //+ [""];
-  final Doctor? doc = UserProfile.getDoctor();
+  final String first = globals.user.getFName();
+  final String last = globals.user.getLName();
+  final String num = globals.user.getNum();
+  final String email = globals.user.getEmail();
+  final List<String> addresses = globals.user.getAddresses(); //+ [""];
   final AddressManager manager = AddressManager();
   int numBars = 0;
   final Color randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
   var image = null;
   var path = null;
   var returnedImage = null;
-  String? imageAdd = UserProfile.getImageAdd();
+  String? imageAdd = globals.user.getImageAdd();
 
 
   @override
@@ -49,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage>{
       }
       globals.rolesDoc.get().then((d) {
         List<String> tmp = [];
-        List<String> verified = UserProfile.getVerifiedRoles();
+        List<String> verified = globals.user.getVerifiedRoles();
         if (verified.length == 0){
           verified.add(globals.baseRole);
         }
@@ -136,28 +135,28 @@ class _ProfilePageState extends State<ProfilePage>{
                               locs.add(a);
                             }
                           }
-                          if (widget.doc != null){
+                          if (globals.user.isDoc()){
                             String? wEmail = globals.workEmailProfKey.currentState!.value;
                             String? wAdd = globals.workAddressProfKey.currentState!.value;
                             String? wPhone = globals.workPhoneProfKey.currentState!.value;
                             String? wSpec = globals.workSpecialtyProfKey.currentState!.value;
-                            widget.doc!.setAll(wEmail,wAdd,wPhone,wSpec);
+                            globals.user.setAllDoc(wEmail,wAdd,wPhone,wSpec);
                           }
-                          UserProfile.profileUpdate(email,first,last,number,widget.returnedImage,locs);
+                          globals.user.profileUpdate(email,first,last,number,widget.returnedImage,locs);
                         })),
                       SizedBox(height: MediaQuery.of(context).size.height * 0.15, child: Row(children: <Widget> [
                         Stack(children: <Widget>[
                           createPic(),
                           Positioned(left: MediaQuery.of(context).size.width * 0.085, bottom: MediaQuery.of(context).size.height * 0.0001, child: GestureDetector(onTap: () async {
                             if (widget.image != null){
-                              UserProfile.setChanged(true);
+                              globals.user.setChanged(true);
                               setState(() {widget.image = widget.returnedImage = null;});
                             }
                           }, child: Container(padding: EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(100)), child: Icon(Icons.delete, color: globals.textColor)))),
                           Positioned(left: MediaQuery.of(context).size.width * 0.09, bottom: MediaQuery.of(context).size.height * 0.1, child: GestureDetector(onTap: () async {
                             var image = await ImagePicker().getImage(source: ImageSource.gallery);
                             if (image != null){
-                              UserProfile.setChanged(true);
+                              globals.user.setChanged(true);
                               image.readAsBytes().then(
                                 (data) {
                                   dynamic loadedImage = NetworkImage(image.path);
@@ -186,8 +185,8 @@ class _ProfilePageState extends State<ProfilePage>{
                         width: MediaQuery.of(context).size.width * 0.1,
                         height: MediaQuery.of(context).size.height * 0.05,
                         child: base.BaseButton(text: "LOG OUT", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () async {
+                          globals.user.logOut();
                           await globals.auth.signOut();
-                          UserProfile.logOut();
                           Navigator.popUntil(context, ModalRoute.withName("/"));
                         })),
               ]
@@ -197,17 +196,17 @@ class _ProfilePageState extends State<ProfilePage>{
       );
   }
   Widget addMedicalInfo(BuildContext context){
-    return widget.doc == null ? Container() : Column(
+    return !globals.user.isDoc() ? Container() : Column(
       children: <Widget> [
             base.BaseDivider(offset: 0.02, text: "LISTING INFORMATION", color: globals.textColor),
-            base.BaseBar(offset: 0.02, initialValue: widget.doc!.getWorkAddress(), icon: globals.email, hint: "Work " + globals.emailHint, validate: auth.emailError, barKey: globals.workEmailProfKey),
-            base.BaseBar(offset: 0.02, initialValue: widget.doc!.getWorkNum(), icon: "photos/phone.png", hint: "Work Number", validate: auth.phoneError, barKey: globals.workPhoneProfKey),
-            base.BaseBar(offset: 0.02, initialValue: widget.doc!.getSpecialty(), icon: globals.dicon, hint: "Specialty", validate: auth.nameError, barKey: globals.workSpecialtyProfKey),
-            bar(widget.doc!.getWorkAddress(), key: globals.workAddressProfKey, hint: "Office Address"),
+            base.BaseBar(offset: 0.02, initialValue: globals.user.getWorkAddress(), icon: globals.email, hint: "Work " + globals.emailHint, validate: auth.emailError, barKey: globals.workEmailProfKey),
+            base.BaseBar(offset: 0.02, initialValue: globals.user.getWorkNum(), icon: "photos/phone.png", hint: "Work Number", validate: auth.phoneError, barKey: globals.workPhoneProfKey),
+            base.BaseBar(offset: 0.02, initialValue: globals.user.getSpecialty(), icon: globals.dicon, hint: "Specialty", validate: auth.nameError, barKey: globals.workSpecialtyProfKey),
+            bar(globals.user.getWorkAddress(), key: globals.workAddressProfKey, hint: "Office Address"),
             SizedBox( 
                         width: MediaQuery.of(context).size.width * 0.1,
                         height: MediaQuery.of(context).size.height * 0.05,
-                        child: base.BaseButton(text: "Schedule Appointments", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () {Navigator.push(context,MaterialPageRoute(builder : (context) => MyListing(doc: widget.doc!)));})
+                        child: base.BaseButton(text: "Schedule Appointments", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () {Navigator.push(context,MaterialPageRoute(builder : (context) => Calendar(doc: globals.user)));})
                         ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
@@ -223,11 +222,12 @@ class _ProfilePageState extends State<ProfilePage>{
       Expanded(child: Text("I am also a", style: TextStyle(color: globals.textColor, fontSize: globals.chosenFontSize))),
       Expanded(child: base.BaseDropDown(text: widget.possibleRoles == null ? [] : widget.possibleRoles, fxn: () {},dropKey: globals.roleProfKey, mode: AutovalidateMode.disabled)),
       SizedBox(width: MediaQuery.of(context).size.width * 0.01),
-      Expanded(child: base.BaseButton(text: "SUBMIT", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () {UserProfile.sendRequest(globals.roleProfKey.currentState!.value);}))
+      Expanded(child: base.BaseButton(text: "SUBMIT", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () {globals.user.sendRequest(globals.roleProfKey.currentState!.value);}))
     ]));
   }
   Widget createPic(){
     print("ehehehe");
+    // print(widget.first[0]);
     return widget.image == null ? Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: widget.randomColor == Colors.blue ? Colors.red : widget.randomColor, shape: BoxShape.circle), child: Center(child: Text((widget.first[0]+ widget.last[0]).toUpperCase(), style: TextStyle(color: globals.textColor, fontSize: 40, fontWeight: FontWeight.bold))))
     : Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: Colors.transparent, shape: BoxShape.circle, image: DecorationImage(fit: BoxFit.fill, image: widget.image)));
   }

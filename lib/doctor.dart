@@ -1,24 +1,22 @@
 import 'auth.dart' as auth;
-import 'displayCal.dart';
+import 'globals.dart' as globals;
 import 'user.dart';
-import 'displayCal.dart';
+import 'calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Doctor{
+class Doctor extends UserProfile{
   List<dynamic> meets = [];
   List<Meeting> appts = [];
   String? workEmail;
   String? workNum;
   String? workAddress;
   String? specialty;
-  Doctor(this.meets, this.workEmail, this.workNum, this.workAddress, this.specialty){
+  Doctor(email,first, last, phone, imageAdd, roles, addresses, verifiedRoles, this.meets, this.workEmail, this.workNum, this.workAddress, this.specialty) : super(email, first, last, phone, imageAdd, roles, addresses, verifiedRoles, true) {
     for (int i = 0; i < meets.length; i++){
       appts.add(Meeting.toMeeting(meets[i]));
     }
   }
 
-  
- 
   void setAppts(List<Meeting>  meetings){
     appts = meetings;
   }
@@ -59,10 +57,10 @@ class Doctor{
   String? getWorkAddress(){
     return workAddress;
   }
-
   String? getSpecialty(){
     return specialty;
   }
+
   dynamic convertMeetings(){
     List<dynamic> jsons = [];
     for (int i = 0; i < appts.length; i++){
@@ -77,7 +75,7 @@ class Doctor{
    Map<String,dynamic> jsons = convertMeetings();
     Map<String,dynamic> map = {"doctorApptEditedOn": FieldValue.serverTimestamp()};
     map.addAll(jsons);
-    UserProfile.updateUser(map,edited:false);
+    globals.user.updateUser(map,edited:false);
   }
 
   List<dynamic> getList(){
@@ -95,7 +93,7 @@ class Doctor{
     return listable;
   }
 
-  void setAll(String? email, String? add, String? phone, String? spec){
+  void setAllDoc(String? email, String? add, String? phone, String? spec){
     print("SETALL");
     print(phone);
     setWorkEmail(email);
@@ -105,7 +103,9 @@ class Doctor{
   }
 
 
-  Map<String,dynamic> toMap(Map<String,dynamic> map){
+  Map<String,dynamic> toMap(){
+    UserProfile user = globals.user;
+    Map<String,dynamic> map = user.toMap();
     print("BABDBABABA");
     map.addAll({"doctorEditedOn": FieldValue.serverTimestamp(), "workEmail": getWorkEmail(), "workNum": getWorkNum(), "workAddress": getWorkAddress(), "specialty": getSpecialty()});
     print(map);
