@@ -1,26 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'user.dart';
+import 'dart:math';
 
+//same day 
+//back button same as press
+//last login
+List<Color> colorCollection = [Color(0xFF0F8644),Color(0xFF8B1FA9),Color(0xFFD20100),Color(0xFFFC571D),Color(0xFF85461E), Color(0xFFFF00FF),Color(0xFF3D4FB5),Color(0xFFE47C73),Color(0xFF636363)];
+List<String> colorNames = ["Green", "Purple", "Red","Orange", "Caramel", "Magenta","Blue","Peach","Gray"];
 
+var user;
+final Color randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+final String apiKey = "AIzaSyCr7jn8bWfmolToBtrxDhAChpe8fy0MQ_4";
 final String textBackground = "photos/trans.png";
 final String background = "photos/bg.jpg";
 final String logo = "photos/logo.png";
 final String email = "photos/login_email.png";
 final String pass = "photos/login_password.png";
+final String dicon = "photos/dicon.png";
 final String address = "photos/address.png";
 final String emailHint = "Email Address";
 final String passHint = "Password";
 final String baseRole = "Patient";
 final double radius = 32;
 final String font = "Roboto";
+final String hp = "Medical Professional";
 final Color textColor = Colors.white;
 final double chosenFontSize = 20;
 final double allPadding = 20;
 final double rightPadding = 10;
 final double iconSize = 64;
+final FirebaseAuth auth = FirebaseAuth.instance;
 final FirebaseStorage storage = FirebaseStorage.instance;
 final FirebaseFirestore firestore = FirebaseFirestore.instance;
+final CollectionReference indexCollection = firestore.collection("Indexes");
+final DocumentReference doctorIndexDoc = indexCollection.doc(hp);
 final CollectionReference userCollection = firestore.collection("Users");
 final CollectionReference reqCollection = firestore.collection("Requests");
 final CollectionReference adminCollection = firestore.collection("Admin");
@@ -28,9 +44,13 @@ final DocumentReference iconsDoc = adminCollection.doc("Icons");
 final DocumentReference rolesDoc = adminCollection.doc("Roles");
 final GlobalKey<FormFieldState> roleProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> emailProfKey = GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> workEmailProfKey = GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> workAddressProfKey = GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> workSpecialtyProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> fNameProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> lNameProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> phoneProfKey = GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> workPhoneProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> roleKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> passKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> conPassKey = GlobalKey<FormFieldState>();
@@ -83,3 +103,13 @@ class Alert{
     return raised;
   }
 }
+
+Widget createPic(var image, String first, String last, BuildContext context){
+    print("ehehehe");
+    // print(widget.first[0]);
+    if (image != null && image is String){
+      image = NetworkImage(image);
+    }
+    return image == null ? Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: randomColor == Colors.blue ? Colors.red : randomColor, shape: BoxShape.circle), child: Center(child: Text((first[0] + last[0]).toUpperCase(), style: TextStyle(color: textColor, fontSize: 40, fontWeight: FontWeight.bold))))
+    : Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: Colors.transparent, shape: BoxShape.circle, image: DecorationImage(fit: BoxFit.fill, image: image)));
+  }

@@ -136,7 +136,7 @@ String? emailError(String email, var key){
 
 
 bool nameValidate(String name){
-  if (name != ""){
+  if (name.length == 0){
     return false;
   }
   return true;
@@ -146,11 +146,14 @@ String? nameError(String name, var key){
   if (name.length != 0){
     return null;
   }
-  String type = "first";
+  String type = "first name";
   if (key == globals.lNameKey || key == globals.lNameProfKey){
-    type = "last";
+    type = "last name";
   }
-  return "Please provide a valid " + type + " name!";
+  else if (key == globals.workSpecialtyProfKey){
+    type = "specialty";
+  }
+  return "Please provide a valid " + type;
 }
 
 String? loginError(String text,var key){
@@ -171,10 +174,10 @@ void createProfile(){
   String email = globals.emailKey.currentState!.value;
   String first = globals.fNameKey.currentState!.value;
   String last = globals.lNameKey.currentState!.value;
-  String? phone = globals.phoneKey.currentState!.value;
+  String phone = globals.phoneKey.currentState!.value == null ? "" : globals.phoneKey.currentState!.value;
   String pos = globals.roleKey.currentState!.value;
-  sendRequest(pos);
-  UserProfile.createUser(email,first,last,phone,pos);
+  UserProfile.createUser(email,first,last,phone);
+  globals.user.sendRequest(pos);
 }
 
 bool phoneValidate(String num){
@@ -196,7 +199,7 @@ String? phoneError(String num, var key){
 void onReset(BuildContext context) async{
   String toast = "A reset link will be sent to your email if it is registered!";
   try {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: globals.emailResetKey.currentState!.value);
+    await globals.auth.sendPasswordResetEmail(email: globals.emailResetKey.currentState!.value);
   }
   catch (e){
     print(e);
@@ -219,7 +222,8 @@ String? roleError(String text, var key){
   }
   return "Please select a role!";
 }
-void onLogin(BuildContext context) async{
+Future<bool> onLogin(BuildContext context) async{
+  bool canLogin = false;
   bool done = true;
   for (int i = 0; i < globals.loginKeys.length; i++){
     print(globals.loginKeys[i]);
@@ -235,9 +239,8 @@ void onLogin(BuildContext context) async{
         email: globals.emailLoginKey.currentState!.value,
         password: globals.passLoginKey.currentState!.value
       );
-      UserProfile.setUser();
       UserProfile.userSetup();
-      Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage(context: context)));
+      canLogin = true;
     }
     on FirebaseAuthException catch (e) {
       print("reached 2");
@@ -250,6 +253,7 @@ void onLogin(BuildContext context) async{
       print(e);
     }
   }
+  return canLogin;
 }
 void onRegister(BuildContext context) async{
   bool done = true;
@@ -271,12 +275,11 @@ void onRegister(BuildContext context) async{
         email: email,
         password: globals.passKey.currentState!.value
       );
-      UserProfile.setUser();
       createProfile();
       print("DOne");
       String toast = "Please check your email and verify it!";
-      if (!UserProfile.getUser().emailVerified){
-        UserProfile.getUser().sendEmailVerification();
+      if (!globals.user.getUser().emailVerified){
+        globals.user.getUser().sendEmailVerification();
       }
       else{
         toast = "Email already verified!";
@@ -298,19 +301,7 @@ void onRegister(BuildContext context) async{
 
 }
 
-void sendRequest(String value){
-  print(value);
-  DocumentReference document = globals.reqCollection.doc(UserProfile.getUid());
-  print(value);
-  if (value != ""){
-    bool added = UserProfile.addRequest(value);
-    if (added){
-      document.set({
-        value + " requests": FieldValue.arrayUnion([Timestamp.now()])
-      }, SetOptions(merge: true));
-    }
-  }
-}
+
 
 
 

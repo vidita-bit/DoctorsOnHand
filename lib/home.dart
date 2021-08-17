@@ -5,15 +5,17 @@ import 'user.dart';
 import 'dart:core';
 import 'dart:math';
 import 'profile.dart';
-
+import 'proflistings.dart';
 class HomePage extends StatefulWidget{
   HomePage({Key? key, required this.context}) : super(key: key);
   BuildContext context;
   Map<String, String> icons = {};
-  List<Function?> fxns = List.empty();
+  List<Function> fxns = List.empty();
+  List<Function> trimmedFxns = [];
   List<String> keys = List.empty();
   List<String> values = List.empty();
   List<dynamic> downloadPaths = List.empty();
+  Map<String,dynamic> order = {};
   int i = 0;
   int cols = 3;
   int rows = 5;
@@ -27,17 +29,18 @@ class _HomePageState extends State<HomePage>{
   @override
   void initState() {
     //better way for this needed
-    widget.fxns = [() {}, () {},() {}, () {Navigator.push(this.context, MaterialPageRoute(builder : (context) => ProfilePage()));},() {}, () {},() {}, () {}, () {}, () {}, () {}];
+    widget.fxns = [() {Navigator.push(this.context, MaterialPageRoute(builder : (context) => Listings()));}, () {Navigator.push(this.context, MaterialPageRoute(builder : (context) => ProfilePage()));},() {print(5);}, () {print(6);},() {print(7);}, () {print(8);}, () {}];
     globals.iconsDoc.get().then((d) {
       print(d.data());
       setState(() {
           var grid = d['Grid'];
           widget.cols = grid['Col'];
           widget.rows = grid['Row'];
+          widget.order = d['Function Order'];
           widget.basePadding = grid["lateralPadding"];
           Map<String, String> map = {};
           List<String>.from(d[globals.baseRole + " Names"]).forEach((item) => map[item] = d[globals.baseRole][item]);
-          List<String> roles = UserProfile.getVerifiedRoles();
+          List<String> roles = globals.user.getVerifiedRoles();
           print("yoohooo");
           roles.sort();
           print(roles);
@@ -94,13 +97,25 @@ class _HomePageState extends State<HomePage>{
         );
   }
  
+  void fixFxns(){
+    for (int j = 0; j < widget.keys.length; j++){
+      print(widget.order);
+      print(widget.keys[j]);
+      print(widget.order["My Appointments"]);
+      widget.trimmedFxns.add(widget.fxns[widget.order[widget.keys[j]]]);
+    }
+  
+  }
   Widget buildRow(index){
+    if (index == 0){
+      fixFxns();
+    }
     int end = index + widget.cols;
     end = min(end,widget.values.length);
     var sizedWidth = ((1 - ((1/widget.cols) * (end - index)))/2);
     widget.i += widget.cols;
     print(1/widget.cols);
-    return base.BaseRow(index: index, keys: widget.keys.sublist(index, end), values: widget.values.sublist(index, end), fxns: widget.fxns.sublist(index, end), cols: widget.cols, rows: widget.rows, sizedWidth: sizedWidth, padding: widget.basePadding);
+    return base.BaseRow(index: index, keys: widget.keys.sublist(index, end), values: widget.values.sublist(index, end), fxns: widget.trimmedFxns.sublist(index, end), cols: widget.cols, rows: widget.rows, sizedWidth: sizedWidth, padding: widget.basePadding);
   }
 
   bool? done(){
