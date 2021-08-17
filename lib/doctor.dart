@@ -7,16 +7,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Doctor extends UserProfile{
   List<dynamic> meets = [];
   List<Meeting> appts = [];
+  Map<Meeting,int> meetMap = {};
   String? workEmail;
   String? workNum;
   String? workAddress;
   String? specialty;
   Doctor(email,first, last, phone, imageAdd, roles, addresses, verifiedRoles, this.meets, this.workEmail, this.workNum, this.workAddress, this.specialty) : super(email, first, last, phone, imageAdd, roles, addresses, verifiedRoles, true) {
     for (int i = 0; i < meets.length; i++){
-      appts.add(Meeting.toMeeting(meets[i]));
+      Meeting meeting = Meeting.toMeeting(meets[i]);
+      appts.add(meeting);
+      meetMap[meeting] = i;
     }
   }
-
+  int meetingToInt(Meeting meeting){
+    return meetMap[meeting]!;
+  }
   void setAppts(List<Meeting>  meetings){
     appts = meetings;
   }
@@ -104,8 +109,7 @@ class Doctor extends UserProfile{
 
 
   Map<String,dynamic> toMap(){
-    UserProfile user = globals.user;
-    Map<String,dynamic> map = user.toMap();
+    Map<String,dynamic> map = super.toMap();
     print("BABDBABABA");
     map.addAll({"doctorEditedOn": FieldValue.serverTimestamp(), "workEmail": getWorkEmail(), "workNum": getWorkNum(), "workAddress": getWorkAddress(), "specialty": getSpecialty()});
     print(map);

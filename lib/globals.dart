@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'user.dart';
+import 'dart:math';
+
 //same day 
 //back button same as press
 //last login
@@ -10,6 +12,7 @@ List<Color> colorCollection = [Color(0xFF0F8644),Color(0xFF8B1FA9),Color(0xFFD20
 List<String> colorNames = ["Green", "Purple", "Red","Orange", "Caramel", "Magenta","Blue","Peach","Gray"];
 
 var user;
+final Color randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
 final String apiKey = "AIzaSyCr7jn8bWfmolToBtrxDhAChpe8fy0MQ_4";
 final String textBackground = "photos/trans.png";
 final String background = "photos/bg.jpg";
@@ -100,3 +103,13 @@ class Alert{
     return raised;
   }
 }
+
+Widget createPic(var image, String first, String last, BuildContext context){
+    print("ehehehe");
+    // print(widget.first[0]);
+    if (image != null && image is String){
+      image = NetworkImage(image);
+    }
+    return image == null ? Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: randomColor == Colors.blue ? Colors.red : randomColor, shape: BoxShape.circle), child: Center(child: Text((first[0] + last[0]).toUpperCase(), style: TextStyle(color: textColor, fontSize: 40, fontWeight: FontWeight.bold))))
+    : Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: Colors.transparent, shape: BoxShape.circle, image: DecorationImage(fit: BoxFit.fill, image: image)));
+  }

@@ -24,14 +24,17 @@ late TimeOfDay _startTime;
 late DateTime _endDate;
 late TimeOfDay _endTime;
 bool _inPerson = false;
+bool _chosenInPerson = false;
 bool _onCall = false;
 String _title = '';
 String _headerFormat = 'MMMM yy';
 String _notes = '';
 
 class EventCalendar extends StatefulWidget {
-  EventCalendar({Key? key, required this.doc}) : super(key: key);
+  EventCalendar({Key? key, required this.doc, this.embed = true, this.enabled = true}) : super(key: key);
   Doctor doc;
+  bool embed;
+  bool enabled;
   @override
   EventCalendarState createState() => EventCalendarState();
 }
@@ -55,23 +58,32 @@ class EventCalendarState extends State<EventCalendar> {
     super.initState();
   }
 
+  Widget embed(){
+    if (widget.embed){
+      return Column(children:<Widget>[
+        Align(alignment: Alignment.topLeft, child: BackButton(color: Colors.white, onPressed: () {
+          widget.doc.saveAppts(_events.getAppointments());
+          Navigator.pop(context);
+        })),
+        base.BaseLogo(),
+      ]);
+    }
+    return Container();
+  }
+
   @override 
   Widget build(BuildContext context){
     return Column(children:<Widget> [
-    Align(alignment: Alignment.topLeft, child: BackButton(color: Colors.white, onPressed: () {
-        widget.doc.saveAppts(_events.getAppointments());
-        Navigator.pop(context);
-      })),
-    base.BaseLogo(), 
-    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-    Center(child: Container(
-      width: MediaQuery.of(context).size.width * 0.75,
-      height: MediaQuery.of(context).size.height * 0.75,
-      child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          body: Padding(
-              padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
-              child: getEventCalendar(_calendarView, _events, onCalendarTapped)))))]);
+      embed(),
+      SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+      Center(child: Container(
+        width: MediaQuery.of(context).size.width * 0.75,
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
+                child: getEventCalendar(_calendarView, _events, onCalendarTapped)))))]);
   }
   
 
@@ -133,7 +145,9 @@ class EventCalendarState extends State<EventCalendar> {
         calendarTapDetails.targetElement != CalendarElement.appointment) {
       return;
     }
-
+    if (!widget.enabled && calendarTapDetails.targetElement != CalendarElement.appointment){
+      return;
+    }
     setState(() {
       _selectedAppointment = null;
       _selectedColorIndex = 0;
@@ -150,6 +164,7 @@ class EventCalendarState extends State<EventCalendar> {
           _title = meetingDetails.eventName == '(No title)' ? '' : meetingDetails.eventName;
           _notes = meetingDetails.description;
           _inPerson = meetingDetails.inPerson;
+          _chosenInPerson = meetingDetails.chosenInPerson;
           _onCall = meetingDetails.onCall;
           _selectedAppointment = meetingDetails;
         } else {
@@ -159,7 +174,7 @@ class EventCalendarState extends State<EventCalendar> {
         }
         _startTime = TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
         _endTime = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
-        Navigator.push<Widget>(context,MaterialPageRoute(builder: (BuildContext context) => AppointmentEditor(doc: widget.doc)),
+        Navigator.push<Widget>(context,MaterialPageRoute(builder: (BuildContext context) => AppointmentEditor(doc: widget.doc, enabled: widget.enabled)),
         );
       }
     });

@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'displayCalendar.dart';
 import 'addressManager.dart';
+import 'calendar.dart';
 
 
 //change from doctor to health professional
@@ -146,7 +147,7 @@ class _ProfilePageState extends State<ProfilePage>{
                         })),
                       SizedBox(height: MediaQuery.of(context).size.height * 0.15, child: Row(children: <Widget> [
                         Stack(children: <Widget>[
-                          createPic(),
+                          globals.createPic(widget.image,widget.first,widget.last, context),
                           Positioned(left: MediaQuery.of(context).size.width * 0.085, bottom: MediaQuery.of(context).size.height * 0.0001, child: GestureDetector(onTap: () async {
                             if (widget.image != null){
                               globals.user.setChanged(true);
@@ -173,6 +174,8 @@ class _ProfilePageState extends State<ProfilePage>{
                         ]),
                         SizedBox(width: MediaQuery.of(context).size.width * 0.2),
                         base.BaseLogo()])),
+                      base.BaseDivider(offset: 0, text: "APPOINTMENTS", color: globals.textColor),
+                      EventCalendar(doc: globals.user, embed: false, enabled: true),
                       base.BaseDivider(offset: 0.02, text: "BASIC INFORMATION", color: globals.textColor),
                       createDrop(),
                       base.BaseBar(offset: 0.02, enabled: false, initialValue: widget.email, trailing: Icon(Icons.lock, color: Colors.white), icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailProfKey),
@@ -189,6 +192,8 @@ class _ProfilePageState extends State<ProfilePage>{
                           await globals.auth.signOut();
                           Navigator.popUntil(context, ModalRoute.withName("/"));
                         })),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+
               ]
             )]
           )
@@ -203,11 +208,7 @@ class _ProfilePageState extends State<ProfilePage>{
             base.BaseBar(offset: 0.02, initialValue: globals.user.getWorkNum(), icon: "photos/phone.png", hint: "Work Number", validate: auth.phoneError, barKey: globals.workPhoneProfKey),
             base.BaseBar(offset: 0.02, initialValue: globals.user.getSpecialty(), icon: globals.dicon, hint: "Specialty", validate: auth.nameError, barKey: globals.workSpecialtyProfKey),
             bar(globals.user.getWorkAddress(), key: globals.workAddressProfKey, hint: "Office Address"),
-            SizedBox( 
-                        width: MediaQuery.of(context).size.width * 0.1,
-                        height: MediaQuery.of(context).size.height * 0.05,
-                        child: base.BaseButton(text: "Schedule Appointments", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () {Navigator.push(context,MaterialPageRoute(builder : (context) => Calendar(doc: globals.user)));})
-                        ),
+
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
       ]
@@ -225,12 +226,7 @@ class _ProfilePageState extends State<ProfilePage>{
       Expanded(child: base.BaseButton(text: "SUBMIT", primary: Colors.blue, secondary: globals.textColor, fontSize: globals.chosenFontSize * 0.75, fxn: () {globals.user.sendRequest(globals.roleProfKey.currentState!.value);}))
     ]));
   }
-  Widget createPic(){
-    print("ehehehe");
-    // print(widget.first[0]);
-    return widget.image == null ? Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: widget.randomColor == Colors.blue ? Colors.red : widget.randomColor, shape: BoxShape.circle), child: Center(child: Text((widget.first[0]+ widget.last[0]).toUpperCase(), style: TextStyle(color: globals.textColor, fontSize: 40, fontWeight: FontWeight.bold))))
-    : Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: Colors.transparent, shape: BoxShape.circle, image: DecorationImage(fit: BoxFit.fill, image: widget.image)));
-  }
+  
 }
 
 
