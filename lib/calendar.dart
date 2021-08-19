@@ -32,7 +32,7 @@ String _notes = '';
 
 class EventCalendar extends StatefulWidget {
   EventCalendar({Key? key, required this.doc, this.embed = true, this.enabled = true}) : super(key: key);
-  Doctor doc;
+  var doc;
   bool embed;
   bool enabled;
   @override

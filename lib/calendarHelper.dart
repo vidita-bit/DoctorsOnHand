@@ -162,7 +162,7 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
         children: <Widget>[
           _getTitle(enabled: enabled),
           Divider(height: 1, thickness: 1),
-          ListTile(
+          if (enabled) ListTile(
             contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
             leading: Icon(Icons.access_time, color: Colors.black54),
             title: Row(children: <Widget>[
@@ -171,12 +171,12 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
                 alignment: Alignment.centerRight,
                 child: Switch(
                   value: _inPerson,
-                  onChanged: (bool value) {enabled == true ? setState(() {_inPerson = value;}) : null;},
+                  onChanged: (bool value) {setState(() {_inPerson = value;});},
                 )
               )
               ),
             ])),
-          ListTile(
+          if (enabled) ListTile(
             contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
             leading: Icon(Icons.access_time, color: Colors.black54),
             title: Row(children: <Widget>[
@@ -185,7 +185,7 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
                 alignment: Alignment.centerRight,
                 child: Switch(
                   value: _onCall,
-                  onChanged: (bool value) {enabled == true ? setState(() {_onCall = value;}) : null;},
+                  onChanged: (bool value) {setState(() {_onCall = value;});},
                 )
               )
               ),
@@ -354,7 +354,7 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
                 child: _inPerson && _onCall ? Switch(
                   value: _chosenInPerson,
                   onChanged: (bool value) {setState(() {_chosenInPerson = value;});},
-                ) : Text(_chosenInPerson ? "YES" : "NO", style: TextStyle(color: Colors.red)),
+                ) : Text(_chosenInPerson ? "YES " : "NO ", style: TextStyle(color: Colors.red)),
               )
               ),
             ])),

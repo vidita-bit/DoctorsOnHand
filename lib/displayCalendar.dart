@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'globals.dart' as globals;
 import 'calendar.dart';
-import 'doctor.dart';
+import 'user.dart';
 class Calendar extends StatefulWidget{
   Calendar({Key? key, required this.doc, this.enabled = true}) : super(key: key);
-  var doc;
+  UserProfile doc;
   bool enabled;
   @override
   _CalendarState createState() => _CalendarState();
