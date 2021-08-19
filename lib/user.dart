@@ -45,7 +45,22 @@ class UserProfile {
     var timestamp = FieldValue.serverTimestamp();
     globals.user.updateUser({"createdOn":timestamp,"usedOn":timestamp, "editedOn":timestamp});
   }
+  dynamic convertMeetings(){
+    List<dynamic> jsons = [];
+    for (int i = 0; i < appts.length; i++){
+      jsons.add(appts[i].toJson());
+    }
 
+    return {"Appts": jsons};
+  }
+
+  void saveAppts(List<Meeting>  meetings){
+    setAppts(meetings);
+    Map<String,dynamic> jsons = convertMeetings();
+    Map<String,dynamic> map = {"doctorApptEditedOn": FieldValue.serverTimestamp()};
+    map.addAll(jsons);
+    globals.user.updateUser(map,edited:false);
+  }
   void setChanged(bool b){
     changed = b;
   }
@@ -167,7 +182,7 @@ void sendRequest(String value){
   String getUid(){
     return uid!;
   }
-  void setAll(String emailAdd, String firstName, String lastName, String phoneNum, {List<String>? addresses = null}) { 
+  void setAll(String emailAdd, String firstName, String lastName, String phoneNum, List<String> addresses,List<Meeting> appts) { 
     setEmail(emailAdd);
     setFName(firstName);
     setLName(lastName);
@@ -179,9 +194,9 @@ void sendRequest(String value){
     
     print("TTHIS HAS BEEEN SET ADAM!!!!");
   }
-  void profileUpdate(String emailAdd, String firstName, String lastName, String phoneNum,var image, List<String> addresses){
+  void profileUpdate(String emailAdd, String firstName, String lastName, String phoneNum,var image, List<String> addresses, List<Meeting> appts){
     bool updated = false;
-    setAll(emailAdd,firstName,lastName,phoneNum, addresses: addresses);
+    setAll(emailAdd,firstName,lastName,phoneNum,addresses, appts);
     if (changed && imageAddress != null){
       changed = false;
       print("DELETION");
@@ -229,7 +244,7 @@ void sendRequest(String value){
 
   Map<String,dynamic> toMap(){
     print("TOMAP");
-    return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(),"image": getImageAdd(), "addresses": getAddresses(), "verifiedRoles": getVerifiedRoles()};
+    return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(),"image": getImageAdd(), "addresses": getAddresses(), "verifiedRoles": getVerifiedRoles(), "Appts": getAppts()};
    
   }
 

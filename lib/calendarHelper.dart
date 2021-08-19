@@ -67,6 +67,7 @@ class AppointmentEditor extends StatefulWidget{
 
 }
 class _AppointmentEditorState extends State<AppointmentEditor>{
+  
   @override
   Widget build(BuildContext context){
     return MaterialApp(
@@ -80,27 +81,7 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
               padding: EdgeInsets.fromLTRB(5,0,5,0),
               icon: Icon(Icons.done, color: Colors.white),
               onPressed: () {
-                final List<Meeting> meetings = [];
-                if (_selectedAppointment != null){
-                  _events.appointments.removeAt(_events.appointments.indexOf(_selectedAppointment!));
-      
-                  _events.notifyListeners(CalendarDataSourceAction.remove,  <Meeting>[]..add(_selectedAppointment!));
-                }
-                meetings.add(Meeting(
-                  from: _startDate,
-                  to: _endDate,
-                  background: globals.colorCollection[_selectedColorIndex],
-                  description: _notes,
-                  inPerson: _inPerson,
-                  chosenInPerson: _inPerson,
-                  onCall: _onCall,
-                  eventName: _title == "" ? "(No title)" : _title
-                ));
-
-                _events.appointments.add(meetings[0]);
-                _events.notifyListeners(CalendarDataSourceAction.add, meetings);
-                _selectedAppointment = null;
-                Navigator.pop(context);
+                onDone(context);
               }
             )
           ],
@@ -358,7 +339,34 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
               )
               ),
             ])),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.5),
+          base.BaseButton(text: "BOOK NOW", secondary: Colors.red, primary: globals.textColor, fxn: () {})
+          
       ])
     );
   }
 }
+
+void onDone(BuildContext context){
+    final List<Meeting> meetings = [];
+    if (_selectedAppointment != null){
+      _events.appointments.removeAt(_events.appointments.indexOf(_selectedAppointment!));
+
+      _events.notifyListeners(CalendarDataSourceAction.remove,  <Meeting>[]..add(_selectedAppointment!));
+    }
+    meetings.add(Meeting(
+      from: _startDate,
+      to: _endDate,
+      background: globals.colorCollection[_selectedColorIndex],
+      description: _notes,
+      inPerson: _inPerson,
+      chosenInPerson: _chosenInPerson,
+      onCall: _onCall,
+      eventName: _title == "" ? "(No title)" : _title
+    ));
+
+    _events.appointments.add(meetings[0]);
+    _events.notifyListeners(CalendarDataSourceAction.add, meetings);
+    _selectedAppointment = null;
+    Navigator.pop(context);
+  }

@@ -120,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage>{
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Align(alignment: Alignment.topLeft, child: BackButton(color: Colors.white, onPressed: () {
-                        Navigator.pop(context);
+                          Navigator.pop(context);
                           print(globals.fNameProfKey.currentState);
                           String email = globals.emailProfKey.currentState!.value;
                           String first = globals.fNameProfKey.currentState!.value;
@@ -143,7 +143,7 @@ class _ProfilePageState extends State<ProfilePage>{
                             String? wSpec = globals.workSpecialtyProfKey.currentState!.value;
                             globals.user.setAllDoc(wEmail,wAdd,wPhone,wSpec);
                           }
-                          globals.user.profileUpdate(email,first,last,number,widget.returnedImage,locs);
+                          globals.user.profileUpdate(email,first,last,number,widget.returnedImage,locs,EventCalendar.getAppts());
                         })),
                       SizedBox(height: MediaQuery.of(context).size.height * 0.15, child: Row(children: <Widget> [
                         Stack(children: <Widget>[

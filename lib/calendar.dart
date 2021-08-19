@@ -37,6 +37,9 @@ class EventCalendar extends StatefulWidget {
   bool enabled;
   @override
   EventCalendarState createState() => EventCalendarState();
+  static List<Meeting> getAppts(){
+    return _events.getAppointments();
+  }
 }
 
 
@@ -44,7 +47,7 @@ class EventCalendarState extends State<EventCalendar> {
   // EventCalendarState();
   CalendarView _calendarView = CalendarView.month;
   late List<Meeting> appointments;
-
+ 
   @override 
   void initState(){
     appointments = widget.doc.getAppts();
