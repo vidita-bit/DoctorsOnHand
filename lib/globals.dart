@@ -27,6 +27,7 @@ final String baseRole = "Patient";
 final double radius = 32;
 final String font = "Roboto";
 final String hp = "Medical Professional";
+final String defaultTitle = "Health Booking";
 final Color textColor = Colors.white;
 final double chosenFontSize = 20;
 final double allPadding = 20;

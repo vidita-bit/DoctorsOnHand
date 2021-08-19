@@ -27,7 +27,7 @@ class UserProfile {
   String? uid = null;
   bool doctor;
 
-  UserProfile(this.meets, this.email,this.first,this.last,this.phone,this.imageAddress, this.requests, this.addresses, this.verifiedRoles, this.doctor){
+  UserProfile(this.meets, this.email,this.first,this.last,this.phone,this.imageAddress, this.requests, this.addresses, this.verifiedRoles, this.doctor, {this.uid}){
      for (int i = 0; i < meets.length; i++){
       Meeting meeting = Meeting.toMeeting(meets[i]);
       appts.add(meeting);
@@ -41,9 +41,10 @@ class UserProfile {
     globals.user = UserProfile([],emailAdd, firstName, lastName, phoneNum,null,[],[],[],false);
     globals.user.setUser();
     Map<String,dynamic> map = globals.user.toMap();
-    createDoc(map,globals.userCollection.doc(globals.user.getUid()));
     var timestamp = FieldValue.serverTimestamp();
-    globals.user.updateUser({"createdOn":timestamp,"usedOn":timestamp, "editedOn":timestamp});
+    map.addAll({"createdOn":timestamp,"usedOn":timestamp, "editedOn":timestamp});
+    print(map);
+    createDoc(map,globals.userCollection.doc(globals.user.getUid()));
   }
   dynamic convertMeetings(){
     List<dynamic> jsons = [];
@@ -54,12 +55,14 @@ class UserProfile {
     return {"Appts": jsons};
   }
 
-  void saveAppts(List<Meeting>  meetings){
-    setAppts(meetings);
+  void saveAppts(List<Meeting> meetings, bool? hadNull){
+    print(meetings);
+    print(getUid());
+    setAppts(meetings,hadNull);
     Map<String,dynamic> jsons = convertMeetings();
-    Map<String,dynamic> map = {"doctorApptEditedOn": FieldValue.serverTimestamp()};
+    Map<String,dynamic> map = {"lastUserBooking": FieldValue.serverTimestamp()};
     map.addAll(jsons);
-    globals.user.updateUser(map,edited:false);
+    updateUser(map,edited:false);
   }
   void setChanged(bool b){
     changed = b;
@@ -69,7 +72,9 @@ class UserProfile {
     uid = globals.auth.currentUser!.uid.toString();
   }
 
- 
+  void addAppt(Meeting appt){
+    appts.add(appt);
+  }
 
   void setAddresses(List<String> a){
     addresses = a;
@@ -112,8 +117,22 @@ class UserProfile {
       phone = number;
     }
   }
-  void setAppts(List<Meeting>  meetings){
-    appts = meetings;
+
+  void setAppts(List<Meeting>  meetings, bool? hadNull){
+    List<Meeting> finalList = [];
+    if (hadNull == null){
+      appts = meetings;
+    }
+    for (int i = 0; i < appts.length; i++){
+      if (hadNull == true && appts[i].user != null){
+        finalList.add(appts[i]);
+      }
+      else if (hadNull == false && appts[i].user == null){
+        finalList.add(appts[i]);
+      }
+    }
+
+    appts = finalList + meetings;
   }
   void setRequests(List<String> reqs){
     requests = reqs;
@@ -169,8 +188,20 @@ void sendRequest(String value){
     return phone;
   }
 
-  List<Meeting> getAppts(){
-    return appts;
+  List<Meeting> getAppts(bool? wantNull){
+    if (wantNull == null){
+      return appts;
+    }
+    List<Meeting> finalList = [];
+    for (int i = 0; i < appts.length; i++){
+      if (wantNull == true && appts[i].user == null){
+        finalList.add(appts[i]);
+      }
+      else if (wantNull == false && appts[i].user != null){
+        finalList.add(appts[i]);
+      }
+    }
+    return finalList;
   }
   User getUser(){
     print(user);
@@ -182,7 +213,8 @@ void sendRequest(String value){
   String getUid(){
     return uid!;
   }
-  void setAll(String emailAdd, String firstName, String lastName, String phoneNum, List<String> addresses,List<Meeting> appts) { 
+  void setAll(String emailAdd, String firstName, String lastName, String phoneNum, List<String> addresses,List<Meeting> appts, bool? wantNull) { 
+    setAppts(appts, wantNull);
     setEmail(emailAdd);
     setFName(firstName);
     setLName(lastName);
@@ -194,9 +226,9 @@ void sendRequest(String value){
     
     print("TTHIS HAS BEEEN SET ADAM!!!!");
   }
-  void profileUpdate(String emailAdd, String firstName, String lastName, String phoneNum,var image, List<String> addresses, List<Meeting> appts){
+  void profileUpdate(String emailAdd, String firstName, String lastName, String phoneNum,var image, List<String> addresses, List<Meeting> appts, bool? nullAppts){
     bool updated = false;
-    setAll(emailAdd,firstName,lastName,phoneNum,addresses, appts);
+    setAll(emailAdd,firstName,lastName,phoneNum,addresses, appts, nullAppts);
     if (changed && imageAddress != null){
       changed = false;
       print("DELETION");
@@ -244,8 +276,10 @@ void sendRequest(String value){
 
   Map<String,dynamic> toMap(){
     print("TOMAP");
-    return {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(),"image": getImageAdd(), "addresses": getAddresses(), "verifiedRoles": getVerifiedRoles(), "Appts": getAppts()};
-   
+    Map<String,dynamic> map =  {"email" : getEmail(), "first" : getFName(), "last" : getLName(), "phone" : getNum(), "requests" : getRequests(),"image": getImageAdd(), "addresses": getAddresses(), "verifiedRoles": getVerifiedRoles()};
+    Map<String,dynamic> jsons = convertMeetings();
+    map.addAll(jsons);
+    return map;
   }
 
   static void userSetup(){

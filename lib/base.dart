@@ -100,8 +100,11 @@ class BaseText extends StatelessWidget {
 }
 
 class BaseCheck extends StatefulWidget {
-  BaseCheck({Key? key, required this.text}) : super(key: key);
+  BaseCheck({Key? key, required this.text, this.activeColor = Colors.pink, this.color = Colors.white, this.callback}) : super(key: key);
   final String text;
+  Color color;
+  Color activeColor;
+  Function? callback;
   @override
   _BaseCheckState createState() => _BaseCheckState();
 }
@@ -110,13 +113,16 @@ class _BaseCheckState extends State<BaseCheck> {
   bool? isChecked = false;
   @override
   Widget build(BuildContext context){
-    return Theme(data: ThemeData(unselectedWidgetColor: globals.textColor), child: CheckboxListTile( 
-      activeColor: Colors.pink[300],
+    return Theme(data: ThemeData(unselectedWidgetColor: widget.color), child: CheckboxListTile( 
+      activeColor: widget.activeColor,
       dense: true,
       title: Text(widget.text, style: TextStyle(color: globals.textColor, fontSize: globals.chosenFontSize)),
       value: isChecked,
       contentPadding: EdgeInsets.all(0),
       onChanged: (bool? newValue) {
+        if (newValue != null && widget.callback != null){
+          widget.callback!(newValue);
+        }
         setState(() {isChecked = newValue;})
       ;}));
   }

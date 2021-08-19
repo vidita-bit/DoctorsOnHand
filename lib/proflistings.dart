@@ -9,8 +9,8 @@ import 'dart:math';
 
 class Listings extends StatefulWidget {
   Listings({Key? key}) : super(key: key);
-  DoctorController controller = DoctorController();
   List<Doctor> docs = [];
+  DoctorController controller = DoctorController();
   @override
   _ListingsState createState() => _ListingsState();
     
@@ -47,6 +47,8 @@ class _ListingsState extends State<Listings> {
                             itemCount: widget.docs.length,
                             itemBuilder: (context, index){
                               Doctor doc = widget.docs[index];
+                              print("Jonnie walker");
+                              print(doc.getUid());
                               return GestureDetector(
                                 onTap: () {
                                   print(index);

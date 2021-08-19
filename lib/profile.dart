@@ -6,10 +6,10 @@ import 'doctor.dart';
 import 'auth.dart' as auth;
 import 'dart:math';
 import 'dart:core';
+import 'doctorController.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'displayCalendar.dart';
 import 'addressManager.dart';
 import 'calendar.dart';
 
@@ -20,6 +20,7 @@ import 'calendar.dart';
 class ProfilePage extends StatefulWidget{
   ProfilePage({Key? key}) : super(key: key);
   List<String> possibleRoles = [];
+  bool nullAppts = true;
   final String first = globals.user.getFName();
   final String last = globals.user.getLName();
   final String num = globals.user.getNum();
@@ -119,8 +120,7 @@ class _ProfilePageState extends State<ProfilePage>{
                   children: <Widget>[Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Align(alignment: Alignment.topLeft, child: BackButton(color: Colors.white, onPressed: () {
-                          Navigator.pop(context);
+                      Align(alignment: Alignment.topLeft, child: BackButton(color: Colors.white, onPressed: () async {
                           print(globals.fNameProfKey.currentState);
                           String email = globals.emailProfKey.currentState!.value;
                           String first = globals.fNameProfKey.currentState!.value;
@@ -143,7 +143,10 @@ class _ProfilePageState extends State<ProfilePage>{
                             String? wSpec = globals.workSpecialtyProfKey.currentState!.value;
                             globals.user.setAllDoc(wEmail,wAdd,wPhone,wSpec);
                           }
-                          globals.user.profileUpdate(email,first,last,number,widget.returnedImage,locs,EventCalendar.getAppts());
+                          await globals.user.profileUpdate(email,first,last,number,widget.returnedImage,locs,EventCalendar.getAppts(), widget.nullAppts);
+                          DoctorController().updateDoc(globals.user.getUid());
+                          Navigator.pop(context);
+
                         })),
                       SizedBox(height: MediaQuery.of(context).size.height * 0.15, child: Row(children: <Widget> [
                         Stack(children: <Widget>[
@@ -174,8 +177,8 @@ class _ProfilePageState extends State<ProfilePage>{
                         ]),
                         SizedBox(width: MediaQuery.of(context).size.width * 0.2),
                         base.BaseLogo()])),
-                      base.BaseDivider(offset: 0, text: "APPOINTMENTS", color: globals.textColor),
-                      EventCalendar(doc: globals.user, embed: false, enabled: true),
+                      if (globals.user.isDoc()) base.BaseDivider(offset: 0, text: "APPOINTMENTS", color: globals.textColor),
+                      if (globals.user.isDoc()) EventCalendar(user: globals.user, embed: false, enabled: true, nullAppts: true),
                       base.BaseDivider(offset: 0.02, text: "BASIC INFORMATION", color: globals.textColor),
                       createDrop(),
                       base.BaseBar(offset: 0.02, enabled: false, initialValue: widget.email, trailing: Icon(Icons.lock, color: Colors.white), icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailProfKey),

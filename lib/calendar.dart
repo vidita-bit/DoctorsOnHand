@@ -9,6 +9,7 @@ import "package:flutter/scheduler.dart";
 import 'globals.dart' as globals;
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'base.dart' as base;
+import 'user.dart';
 import 'doctor.dart';
 part 'colorPicker.dart';
 part 'calendarHelper.dart';
@@ -23,6 +24,7 @@ late DateTime _startDate;
 late TimeOfDay _startTime;
 late DateTime _endDate;
 late TimeOfDay _endTime;
+Map<String, dynamic>? _user = null;
 bool _inPerson = false;
 bool _chosenInPerson = false;
 bool _onCall = false;
@@ -31,8 +33,10 @@ String _headerFormat = 'MMMM yy';
 String _notes = '';
 
 class EventCalendar extends StatefulWidget {
-  EventCalendar({Key? key, required this.doc, this.embed = true, this.enabled = true}) : super(key: key);
-  var doc;
+  EventCalendar({Key? key, required this.nullAppts, required this.user, this.doc, this.embed = true, this.enabled = true}) : super(key: key);
+  UserProfile user;
+  bool nullAppts;
+  Doctor? doc;
   bool embed;
   bool enabled;
   @override
@@ -47,10 +51,10 @@ class EventCalendarState extends State<EventCalendar> {
   // EventCalendarState();
   CalendarView _calendarView = CalendarView.month;
   late List<Meeting> appointments;
- 
+  
   @override 
   void initState(){
-    appointments = widget.doc.getAppts();
+    appointments = widget.user.getAppts(widget.nullAppts);
     _events = DataSource(appointments: appointments);
     _selectedAppointment = null;
     _selectedColorIndex = 0;
@@ -65,7 +69,7 @@ class EventCalendarState extends State<EventCalendar> {
     if (widget.embed){
       return Column(children:<Widget>[
         Align(alignment: Alignment.topLeft, child: BackButton(color: Colors.white, onPressed: () {
-          widget.doc.saveAppts(_events.getAppointments());
+          widget.user.saveAppts(_events.getAppointments(), widget.nullAppts);
           Navigator.pop(context);
         })),
         base.BaseLogo(),
@@ -124,14 +128,14 @@ class EventCalendarState extends State<EventCalendar> {
   if (_calendarView == CalendarView.day) {
     _headerFormat = 'yyy MMM';
   } else if (_calendarView == CalendarView.week ||
-      _calendarView == CalendarView.workWeek ||
-     _calendarView == CalendarView.timelineDay ||
-      _calendarView == CalendarView.timelineMonth) {
+    _calendarView == CalendarView.workWeek ||
+    _calendarView == CalendarView.timelineDay ||
+    _calendarView == CalendarView.timelineMonth) {
     _headerFormat = 'MMM yyy';
   } else if (_calendarView == CalendarView.month) {
     _headerFormat = 'MMMM yy';
   } else if (_calendarView == CalendarView.timelineWeek ||
-      _calendarView== CalendarView.timelineWorkWeek) {
+    _calendarView == CalendarView.timelineWorkWeek) {
     _headerFormat = 'MMM yy';
   } else {
     _headerFormat = 'yyy';
@@ -151,6 +155,9 @@ class EventCalendarState extends State<EventCalendar> {
     if (!widget.enabled && calendarTapDetails.targetElement != CalendarElement.appointment){
       return;
     }
+    print("LOVE");
+    print(!widget.enabled);
+    
     setState(() {
       _selectedAppointment = null;
       _selectedColorIndex = 0;
@@ -163,21 +170,24 @@ class EventCalendarState extends State<EventCalendar> {
           final Meeting meetingDetails = calendarTapDetails.appointments![0];
           _startDate = meetingDetails.from;
           _endDate = meetingDetails.to;
+          _user = meetingDetails.user;
           _selectedColorIndex = globals.colorCollection.indexOf(meetingDetails.background);
-          _title = meetingDetails.eventName == '(No title)' ? '' : meetingDetails.eventName;
+          _title = meetingDetails.eventName;
           _notes = meetingDetails.description;
           _inPerson = meetingDetails.inPerson;
+          print("if");
           _chosenInPerson = meetingDetails.chosenInPerson;
           _onCall = meetingDetails.onCall;
           _selectedAppointment = meetingDetails;
         } else {
           final DateTime date = calendarTapDetails.date!;
+          print("else");
           _startDate = date;
           _endDate = date.add(Duration(hours: 1));
         }
         _startTime = TimeOfDay(hour: _startDate.hour, minute: _startDate.minute);
         _endTime = TimeOfDay(hour: _endDate.hour, minute: _endDate.minute);
-        Navigator.push<Widget>(context,MaterialPageRoute(builder: (BuildContext context) => AppointmentEditor(doc: widget.doc, enabled: widget.enabled)),
+        Navigator.push<Widget>(context,MaterialPageRoute(builder: (BuildContext context) => AppointmentEditor(doc: widget.doc, enabled: widget.enabled, nullAppts: widget.nullAppts)),
         );
       }
     });

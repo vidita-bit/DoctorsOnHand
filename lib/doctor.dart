@@ -9,7 +9,7 @@ class Doctor extends UserProfile{
   String? workNum;
   String? workAddress;
   String? specialty;
-  Doctor(meets, email,first, last, phone, imageAdd, roles, addresses, verifiedRoles, this.workEmail, this.workNum, this.workAddress, this.specialty) : super(meets,email, first, last, phone, imageAdd, roles, addresses, verifiedRoles, true) {
+  Doctor(meets, email,first, last, phone, imageAdd, roles, addresses, verifiedRoles, this.workEmail, this.workNum, this.workAddress, this.specialty, {uid}) : super(meets,email, first, last, phone, imageAdd, roles, addresses, verifiedRoles, true, uid: uid) {
    
   }
   
