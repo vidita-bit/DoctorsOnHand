@@ -19,6 +19,7 @@ class DocListing extends StatefulWidget {
 class _DocListingState extends State<DocListing> {
   @override
   void initState(){
+    print(widget.doc.getAppts(null));
     widget.icons = [Icons.phone, Icons.email, Icons.location_pin];
     widget.fxns = [widget.doc.getWorkNum, widget.doc.getWorkEmail, widget.doc.getWorkAddress];
   }
@@ -60,7 +61,7 @@ class _DocListingState extends State<DocListing> {
                         ]
                       ),
                       SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                      EventCalendar(doc: widget.doc, embed: false, enabled: false),
+                      EventCalendar(user: widget.doc, doc: widget.doc, embed: false, enabled: false, nullAppts: true),
                       SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
                   ]

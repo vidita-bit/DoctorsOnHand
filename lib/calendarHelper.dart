@@ -13,7 +13,7 @@ Methods needed:
 */
 class Meeting {
   Meeting({required this.from, required this.inPerson, required this.chosenInPerson, required this.onCall, required this.to,this.background = Colors.green, this.eventName = '', this.description = '', this.user});
-  final Map<dynamic, String>? user;
+  final Map<String, dynamic>? user;
   final String eventName;
   final DateTime from;
   final DateTime to;
@@ -59,14 +59,16 @@ class DataSource extends CalendarDataSource {
 
 
 class AppointmentEditor extends StatefulWidget{
-  AppointmentEditor({Key? key, required this.doc, this.enabled = true}) : super(key: key);
-  Doctor doc;
+  AppointmentEditor({Key? key, this.doc, this.enabled = true, required this.nullAppts}) : super(key: key);
+  Doctor? doc;
+  bool? nullAppts;
   bool enabled;
   @override
   _AppointmentEditorState createState() => _AppointmentEditorState();
 
 }
 class _AppointmentEditorState extends State<AppointmentEditor>{
+  
   @override
   Widget build(BuildContext context){
     return MaterialApp(
@@ -74,33 +76,19 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
         appBar: AppBar(
           title: Text(getTitle()),
           backgroundColor: globals.colorCollection[_selectedColorIndex],
-          leading: IconButton(icon: Icon(Icons.close, color: Colors.white), onPressed: () {Navigator.pop(context);}),
+          leading: IconButton(icon: Icon(Icons.close, color: Colors.white), onPressed: () {
+            _user = null; 
+            _onCall = false;
+            _inPerson = false;
+            _chosenInPerson = false;
+            Navigator.pop(context);
+          }),
           actions: <Widget>[
             if (widget.enabled) IconButton(
               padding: EdgeInsets.fromLTRB(5,0,5,0),
               icon: Icon(Icons.done, color: Colors.white),
-              onPressed: () {
-                final List<Meeting> meetings = [];
-                if (_selectedAppointment != null){
-                  _events.appointments.removeAt(_events.appointments.indexOf(_selectedAppointment!));
-      
-                  _events.notifyListeners(CalendarDataSourceAction.remove,  <Meeting>[]..add(_selectedAppointment!));
-                }
-                meetings.add(Meeting(
-                  from: _startDate,
-                  to: _endDate,
-                  background: globals.colorCollection[_selectedColorIndex],
-                  description: _notes,
-                  inPerson: _inPerson,
-                  chosenInPerson: _inPerson,
-                  onCall: _onCall,
-                  eventName: _title == "" ? "(No title)" : _title
-                ));
-
-                _events.appointments.add(meetings[0]);
-                _events.notifyListeners(CalendarDataSourceAction.add, meetings);
-                _selectedAppointment = null;
-                Navigator.pop(context);
+              onPressed: () async {
+                await onDone(context);
               }
             )
           ],
@@ -148,7 +136,7 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
             ),
             decoration: InputDecoration(
               border: InputBorder.none,
-              hintText: "Add Title"
+              hintText: enabled ? "Add Title" : globals.defaultTitle
             ),
         ),
         );
@@ -160,9 +148,10 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
       child: ListView(
         // padding: EdgeInsets.all(0),
         children: <Widget>[
+          if (_user != null) addUserInfo(),
           _getTitle(enabled: enabled),
           Divider(height: 1, thickness: 1),
-          ListTile(
+          if (enabled) ListTile(
             contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
             leading: Icon(Icons.access_time, color: Colors.black54),
             title: Row(children: <Widget>[
@@ -171,12 +160,12 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
                 alignment: Alignment.centerRight,
                 child: Switch(
                   value: _inPerson,
-                  onChanged: (bool value) {enabled == true ? setState(() {_inPerson = value;}) : null;},
+                  onChanged: (bool value) {setState(() {_inPerson = value;});},
                 )
               )
               ),
             ])),
-          ListTile(
+          if (enabled) ListTile(
             contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
             leading: Icon(Icons.access_time, color: Colors.black54),
             title: Row(children: <Widget>[
@@ -185,7 +174,7 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
                 alignment: Alignment.centerRight,
                 child: Switch(
                   value: _onCall,
-                  onChanged: (bool value) {enabled == true ? setState(() {_onCall = value;}) : null;},
+                  onChanged: (bool value) {setState(() {_onCall = value;});},
                 )
               )
               ),
@@ -348,17 +337,89 @@ class _AppointmentEditorState extends State<AppointmentEditor>{
             contentPadding: EdgeInsets.fromLTRB(5, 2, 5, 2),
             leading: Icon(Icons.access_time, color: Colors.red),
             title: Row(children: <Widget>[
-              Expanded(child: Text("Is this meeting in person?", style: TextStyle(color: Colors.red))),
+              Expanded(child: Text("Is this meeting in person?", style: TextStyle(color: Colors.red, fontSize: globals.chosenFontSize))),
               Expanded(child: Align(
                 alignment: Alignment.centerRight,
-                child: _inPerson && _onCall ? Switch(
-                  value: _chosenInPerson,
-                  onChanged: (bool value) {setState(() {_chosenInPerson = value;});},
-                ) : Text(_chosenInPerson ? "YES" : "NO", style: TextStyle(color: Colors.red)),
+                child: _user == null && _inPerson && _onCall ? base.BaseCheck(callback: (bool val) {_chosenInPerson = val;}, text:"", activeColor: globals.colorCollection[_selectedColorIndex], color: Colors.red) : Text(_chosenInPerson ? "YES " : "NO ", style: TextStyle(color: Colors.red)),
               )
               ),
             ])),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.5),
+          if (!enabled && _user == null && widget.doc!.getUid() != globals.user.getUid()) base.BaseButton(text: "BOOK NOW", secondary: Colors.red, primary: globals.textColor, fxn: () async {
+            print(_chosenInPerson);
+         
+            await onDone(context, user: {"owner": widget.doc!.getUid(), "ownerName": widget.doc!.getFName() + " " + widget.doc!.getLName(), "ownerEmail": widget.doc!.getWorkEmail(), "ownerNumber": widget.doc!.getWorkNum(), "ownerAddress": widget.doc!.getWorkAddress(),
+            "booker": globals.user.getUid(),  "bookerName": globals.user.getFName() + " " + globals.user.getLName(), "bookerEmail": globals.user.getEmail(), "bookerNumber": globals.user.getNum()});
+          }),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+          
       ])
     );
   }
+
+  Widget addUserInfo(){
+    List<IconData> icons = [Icons.person, Icons.email];
+    String person = "booker";
+    TextStyle style = TextStyle(color: Colors.black, fontSize: globals.chosenFontSize * 1.5, fontWeight: FontWeight.bold);
+    if (_user![person] == globals.user.getUid()){
+      person = "owner";
+    }
+    List<String> items = [_user![person + "Name"]!, _user![person + "Email"]!];
+    String?  number = _user![person + "Number"];   
+
+    if (number != null && number.length != 0){
+      icons.add(Icons.phone);
+      items.add(number);
+    }
+    if (person == "owner"){
+      icons.add(Icons.location_pin);
+      items.add(_user![person + "Address"]!);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        for (int i = 0; i < items.length; i ++) 
+          Row(children: <Widget>[
+            Icon(icons[i], color: Colors.black, size: globals.chosenFontSize * 1.25), 
+            SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+            Text(items[i], style: TextStyle(color: Colors.black, fontSize: globals.chosenFontSize * 1.25))
+          ]),
+        Divider(height: 1, thickness: 1),
+      ]
+    );
+  }
+  Future<void> onDone(BuildContext context, {Map<String, dynamic>? user}) async {
+    final List<Meeting> meetings = [];
+    if (_selectedAppointment != null){
+      _events.appointments.removeAt(_events.appointments.indexOf(_selectedAppointment!));
+
+      _events.notifyListeners(CalendarDataSourceAction.remove,  <Meeting>[]..add(_selectedAppointment!));
+    }
+    Meeting meeting = Meeting(
+      from: _startDate,
+      to: _endDate,
+      background: globals.colorCollection[_selectedColorIndex],
+      description: _notes,
+      inPerson: _inPerson,
+      user: user,
+      chosenInPerson: _chosenInPerson,
+      onCall: _onCall,
+      eventName: _title == "" ? globals.defaultTitle : _title
+    );
+    meetings.add(meeting);
+
+    _events.appointments.add(meetings[0]);
+    _events.notifyListeners(CalendarDataSourceAction.add, meetings);
+    _selectedAppointment = null;
+    if (user != null){
+      globals.user.addAppt(meeting);
+      await globals.user.saveAppts(globals.user.getAppts(null),null);
+      print("JOON");
+      print(widget.doc!.getUid());
+      widget.doc!.saveAppts(_events.getAppointments(), widget.nullAppts);
+
+    }
+    Navigator.pop(context);
+  }
 }
+
