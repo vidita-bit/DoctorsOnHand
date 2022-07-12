@@ -25,7 +25,7 @@ class _CalendarState extends State<Calendar>{
           backgroundColor: Colors.transparent,
           body: ListView(
             children: <Widget>[
-              EventCalendar(user: widget.doc, enabled: widget.enabled)
+              EventCalendar(user: widget.doc, enabled: widget.enabled, nullAppts: false,)
             ]
           )
         )

@@ -1,3 +1,4 @@
+import 'package:doctorsonhand/screens/resetScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,8 +25,8 @@ import 'doctorController.dart';
 //SQL injection
 //optional phone number
 //drop down list doctor, patient, admin
-//one line, bold "I am a" 
-//email and phone could be used 
+//one line, bold "I am a"
+//email and phone could be used
 //registration email or phone number
 //if both allow chosing authentication
 Future<void> main() async {
@@ -37,9 +38,8 @@ Future<void> main() async {
   runApp(MyApp(user: user));
 }
 
-
 class MyApp extends StatelessWidget {
-  MyApp({Key? key, User? this.user}) : super(key: key);
+  MyApp({Key? key, this.user}) : super(key: key);
   User? user;
   // This widget is the root of your application.
   @override
@@ -49,12 +49,12 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  Widget chooseWidget(BuildContext context){
-    if (globals.auth.currentUser != null){
+  Widget chooseWidget(BuildContext context) {
+    if (globals.auth.currentUser != null) {
       UserProfile.userSetup();
-      return LoginPage(enabled: true); 
-    }
-    else{
+
+      return LoginPage(enabled: true);
+    } else {
       return LoginPage();
     }
   }
@@ -76,21 +76,23 @@ class LoginPage extends StatefulWidget {
 
   @override
   _LoginPageState createState() => _LoginPageState();
-    
 }
 
 class _LoginPageState extends State<LoginPage> {
-
-  @override 
-  void initState(){
-    if (widget.enabled){
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
-        Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage(context: context)));
+  @override
+  void initState() {
+    if (widget.enabled) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => HomePage(context: context)));
       });
     }
- 
+
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -100,43 +102,80 @@ class _LoginPageState extends State<LoginPage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Container(
-        decoration: BoxDecoration(
+      decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(globals.background),
-            fit: BoxFit.cover,
-          )
-        ),
-        child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Center(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                  base.BaseLogo(),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                  base.BaseBar(offset: 0.02, controller: widget.user, icon: globals.email, hint: globals.emailHint, validate: auth.emailError, barKey: globals.emailLoginKey),
-                  base.BaseBar(offset: 0.02, controller: widget.pass, icon: globals.pass, hint: globals.passHint, validate: auth.loginError, obscure: true, barKey: globals.passLoginKey, mode: AutovalidateMode.disabled),
-                  base.BaseButton(text: "Forgot your password?", primary: globals.textColor, secondary: Colors.transparent, fontSize: globals.chosenFontSize * 0.75, fxn: () {Navigator.push(context,MaterialPageRoute(builder : (context) => ResetPage()));}),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.005),
-                  SizedBox( 
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    height: MediaQuery.of(context).size.height * 0.1,
-                    child: base.BaseButton(text: "LOGIN", primary: Colors.blue.shade700, secondary: globals.textColor, fontSize: globals.chosenFontSize, weight: FontWeight.bold, fxn: () async {
+        image: AssetImage(globals.background),
+        fit: BoxFit.cover,
+      )),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+            base.BaseLogo(),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+            base.BaseBar(
+                offset: 0.02,
+                controller: widget.user,
+                icon: globals.email,
+                hint: globals.emailHint,
+                validate: auth.emailError,
+                barKey: globals.emailLoginKey),
+            base.BaseBar(
+                offset: 0.02,
+                controller: widget.pass,
+                icon: globals.pass,
+                hint: globals.passHint,
+                validate: auth.loginError,
+                obscure: true,
+                barKey: globals.passLoginKey,
+                mode: AutovalidateMode.disabled),
+            base.BaseButton(
+                text: "Forgot your password?",
+                primary: globals.textColor,
+                secondary: Colors.transparent,
+                fontSize: globals.chosenFontSize * 0.75,
+                fxn: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => ResetPage()));
+                }),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.005),
+            SizedBox(
+                width: MediaQuery.of(context).size.width * 0.2,
+                height: MediaQuery.of(context).size.height * 0.1,
+                child: base.BaseButton(
+                    text: "LOGIN",
+                    primary: Colors.blue.shade700,
+                    secondary: globals.textColor,
+                    fontSize: globals.chosenFontSize,
+                    weight: FontWeight.bold,
+                    fxn: () async {
                       bool canLogin = await auth.onLogin(context);
-                      if (canLogin){
+                      if (canLogin) {
                         widget.user.clear();
                         widget.pass.clear();
-                        Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage(context: context)));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    HomePage(context: context)));
                       }
-                    })
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.005),
-                  base.BaseButton(text: "Don't have an account? Register", primary: globals.textColor, secondary: Colors.transparent, fontSize: globals.chosenFontSize * 0.75, fxn: () {Navigator.push(context,MaterialPageRoute(builder : (context) => RegPage()));})
-                ],
-              )
-            ), 
-        ),
+                    })),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.005),
+            base.BaseButton(
+                text: "Don't have an account? Register",
+                primary: globals.textColor,
+                secondary: Colors.transparent,
+                fontSize: globals.chosenFontSize * 0.75,
+                fxn: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => RegPage()));
+                })
+          ],
+        )),
+      ),
     );
   }
 }

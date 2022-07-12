@@ -5,14 +5,35 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'user.dart';
 import 'dart:math';
 
-//same day 
+//same day
 //back button same as press
 //last login
-List<Color> colorCollection = [Color(0xFF0F8644),Color(0xFF8B1FA9),Color(0xFFD20100),Color(0xFFFC571D),Color(0xFF85461E), Color(0xFFFF00FF),Color(0xFF3D4FB5),Color(0xFFE47C73),Color(0xFF636363)];
-List<String> colorNames = ["Green", "Purple", "Red","Orange", "Caramel", "Magenta","Blue","Peach","Gray"];
+List<Color> colorCollection = [
+  Color(0xFF0F8644),
+  Color(0xFF8B1FA9),
+  Color(0xFFD20100),
+  Color(0xFFFC571D),
+  Color(0xFF85461E),
+  Color(0xFFFF00FF),
+  Color(0xFF3D4FB5),
+  Color(0xFFE47C73),
+  Color(0xFF636363)
+];
+List<String> colorNames = [
+  "Green",
+  "Purple",
+  "Red",
+  "Orange",
+  "Caramel",
+  "Magenta",
+  "Blue",
+  "Peach",
+  "Gray"
+];
 
 var user;
-final Color randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+final Color randomColor =
+    Colors.primaries[Random().nextInt(Colors.primaries.length)];
 final String apiKey = "AIzaSyCr7jn8bWfmolToBtrxDhAChpe8fy0MQ_4";
 final String textBackground = "photos/trans.png";
 final String background = "photos/bg.jpg";
@@ -46,8 +67,10 @@ final DocumentReference rolesDoc = adminCollection.doc("Roles");
 final GlobalKey<FormFieldState> roleProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> emailProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> workEmailProfKey = GlobalKey<FormFieldState>();
-final GlobalKey<FormFieldState> workAddressProfKey = GlobalKey<FormFieldState>();
-final GlobalKey<FormFieldState> workSpecialtyProfKey = GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> workAddressProfKey =
+    GlobalKey<FormFieldState>();
+final GlobalKey<FormFieldState> workSpecialtyProfKey =
+    GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> fNameProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> lNameProfKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> phoneProfKey = GlobalKey<FormFieldState>();
@@ -63,54 +86,80 @@ final GlobalKey<FormFieldState> passLoginKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> emailLoginKey = GlobalKey<FormFieldState>();
 final GlobalKey<FormFieldState> emailResetKey = GlobalKey<FormFieldState>();
 final List<GlobalKey<FormFieldState>> loginKeys = [passLoginKey, emailLoginKey];
-final List<GlobalKey<FormFieldState>> regKeys = [passKey, conPassKey, emailKey, fNameKey, lNameKey, roleKey, phoneKey];
+final List<GlobalKey<FormFieldState>> regKeys = [
+  passKey,
+  conPassKey,
+  emailKey,
+  fNameKey,
+  lNameKey,
+  phoneKey
+];
 // final List<GlobalKey<FormFieldState>> profKeys = [emailProfKey, fNameProfKey, lNameProfKey, phoneProfKey];
 
-final Map keyMap = {conPassKey : passKey};
+final Map keyMap = {conPassKey: passKey};
 
-
-class ObjWrapper{
+class ObjWrapper {
   var item;
-  ObjWrapper(dynamic item){
+  ObjWrapper(dynamic item) {
     this.item = item;
   }
-  dynamic getItem(){
+  dynamic getItem() {
     return item;
   }
 
-  void setItem(dynamic item){
+  void setItem(dynamic item) {
     this.item = item;
   }
-
 }
-class Wrapper{
+
+class Wrapper {
   Function? fxn;
-  Wrapper(Function fxn){
+  Wrapper(Function fxn) {
     this.fxn = fxn;
   }
-  Object? getItem(){
+  Object? getItem() {
     return fxn!();
   }
 }
 
-class Alert{
+class Alert {
   bool? raised = null;
-  
-  void change(bool alert){
+
+  void change(bool alert) {
     raised = alert;
   }
 
-  bool? check(){
+  bool? check() {
     return raised;
   }
 }
 
-Widget createPic(var image, String first, String last, BuildContext context){
-    print("ehehehe");
-    // print(widget.first[0]);
-    if (image != null && image is String){
-      image = NetworkImage(image);
-    }
-    return image == null ? Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: randomColor == Colors.blue ? Colors.red : randomColor, shape: BoxShape.circle), child: Center(child: Text((first[0] + last[0]).toUpperCase(), style: TextStyle(color: textColor, fontSize: 40, fontWeight: FontWeight.bold))))
-    : Container(margin: EdgeInsets.all(0), height: MediaQuery.of(context).size.height * 0.15, width: MediaQuery.of(context).size.width * 0.15, decoration: BoxDecoration(color: Colors.transparent, shape: BoxShape.circle, image: DecorationImage(fit: BoxFit.fill, image: image)));
+Widget createPic(var image, String first, String last, BuildContext context) {
+  print("ehehehe");
+  // print(widget.first[0]);
+  if (image != null && image is String) {
+    image = NetworkImage(image);
   }
+  return image == null
+      ? Container(
+          margin: EdgeInsets.all(0),
+          height: MediaQuery.of(context).size.height * 0.15,
+          width: MediaQuery.of(context).size.width * 0.15,
+          decoration: BoxDecoration(
+              color: randomColor == Colors.blue ? Colors.red : randomColor,
+              shape: BoxShape.circle),
+          child: Center(
+              child: Text((first[0] + last[0]).toUpperCase(),
+                  style: TextStyle(
+                      color: textColor,
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold))))
+      : Container(
+          margin: EdgeInsets.all(0),
+          height: MediaQuery.of(context).size.height * 0.15,
+          width: MediaQuery.of(context).size.width * 0.15,
+          decoration: BoxDecoration(
+              color: Colors.transparent,
+              shape: BoxShape.circle,
+              image: DecorationImage(fit: BoxFit.fill, image: image)));
+}

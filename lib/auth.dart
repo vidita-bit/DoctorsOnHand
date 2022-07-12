@@ -1,3 +1,4 @@
+import 'package:doctorsonhand/screens/resetScreen.dart';
 import 'package:validators/validators.dart';
 import 'globals.dart' as globals;
 import 'home.dart';
@@ -11,122 +12,110 @@ class FireError {
   static bool emailError = false;
   static String? email;
   static bool credError = false;
-  static void setEmailError(bool err){
+  static void setEmailError(bool err) {
     emailError = err;
   }
 
-  static void setEmail(String? newEmail){
+  static void setEmail(String? newEmail) {
     email = newEmail;
   }
 
-  static bool getEmailError(){
+  static bool getEmailError() {
     return emailError;
   }
 
-  static String? getEmail(){
+  static String? getEmail() {
     return email;
   }
 
-  static bool handleCredError(bool change){
+  static bool handleCredError(bool change) {
     bool tmp = credError;
-    if (change){
+    if (change) {
       credError = !credError;
     }
     return tmp;
   }
-
 }
 
-String getApprovedSymbols(){
+String getApprovedSymbols() {
   return "!@#\$%^&*(){}[]-_=+\|><?/";
 }
-bool? passValidate(String pass){
 
+bool? passValidate(String pass) {
   print(pass.length);
-  if (pass.length < 8){
+  if (pass.length < 8) {
     return false;
   }
-  
-  List<bool> arr = [false,false,false,false];
-  for (int i = 0; i < pass.length; i++){
-    if (isNumeric(pass[i])){
+
+  List<bool> arr = [false, false, false, false];
+  for (int i = 0; i < pass.length; i++) {
+    if (isNumeric(pass[i])) {
       arr[0] = true;
-    }
-
-    else if(getApprovedSymbols().contains(pass[i])){
+    } else if (getApprovedSymbols().contains(pass[i])) {
       arr[1] = true;
-    }
-    else if(isUppercase(pass[i])){
+    } else if (isUppercase(pass[i])) {
       arr[2] = true;
-    }
-
-    else if(isLowercase(pass[i])){
+    } else if (isLowercase(pass[i])) {
       arr[3] = true;
-    }
-    else{
+    } else {
       arr.add(false);
     }
-
   }
-  
 
-  if (arr.length > 4){
+  if (arr.length > 4) {
     return null;
-  }
-  else if (!arr.contains(false)){
+  } else if (!arr.contains(false)) {
     return true;
   }
   return false;
 }
 
-String? passError(String pass,var key){
+String? passError(String pass, var key) {
   var returnValue = passValidate(pass);
   String returnString = "Invalid password!";
 
-  if (returnValue == true){
+  if (returnValue == true) {
     return null;
-  }
-  else if (returnValue == null){
+  } else if (returnValue == null) {
     returnString = "Invalid character detected!";
   }
   return returnString;
 }
-String? confirmError(String confirm, var key){
-  if (confirm != globals.keyMap[key].currentState.value){
+
+String? confirmError(String confirm, var key) {
+  if (confirm != globals.keyMap[key].currentState.value) {
     return "The passwords do not match!";
   }
 
   return null;
 }
 
-bool emailValidate(String email){
+bool emailValidate(String email) {
   bool valid = true;
   int atSeen = 0;
   int dotSeen = 0;
-  for (int i = 0; i < email.length; i++){
+  for (int i = 0; i < email.length; i++) {
     String c = email[i];
-    if (c == "@"){
+    if (c == "@") {
       atSeen++;
-    }
-    else if (c == "." && atSeen != 0){
+    } else if (c == "." && atSeen != 0) {
       dotSeen++;
-    }
-    else if (!isAlphanumeric(c)){
+    } else if (!isAlphanumeric(c)) {
       valid = false;
     }
   }
-  if (atSeen != 1 || dotSeen != 1){
+  if (atSeen != 1 || dotSeen != 1) {
     valid = false;
   }
 
   return valid;
 }
 
-String? emailError(String email, var key){
-  if (!emailValidate(email)){
+String? emailError(String email, var key) {
+  if (!emailValidate(email)) {
     return "Please enter a valid email!";
   }
-  if (FireError.getEmailError() || (email == FireError.getEmail())){
+  if (FireError.getEmailError() || (email == FireError.getEmail())) {
     FireError.setEmailError(false);
     return "That email address is already taken!";
   }
@@ -134,175 +123,206 @@ String? emailError(String email, var key){
   return null;
 }
 
-
-bool nameValidate(String name){
-  if (name.length == 0){
+bool nameValidate(String name) {
+  if (name.length == 0) {
     return false;
   }
   return true;
 }
 
-String? nameError(String name, var key){
-  if (name.length != 0){
+String? nameError(String name, var key) {
+  if (name.length != 0) {
     return null;
   }
   String type = "first name";
-  if (key == globals.lNameKey || key == globals.lNameProfKey){
+  if (key == globals.lNameKey || key == globals.lNameProfKey) {
     type = "last name";
-  }
-  else if (key == globals.workSpecialtyProfKey){
+  } else if (key == globals.workSpecialtyProfKey) {
     type = "specialty";
   }
   return "Please provide a valid " + type;
 }
 
-String? loginError(String text,var key){
+String? loginError(String text, var key) {
   print("reached3");
   String? response = passError(text, key);
-  if (response != null){
+  if (response != null) {
     return response;
   }
   print(FireError.handleCredError(false));
-  if (FireError.handleCredError(false)){
+  if (FireError.handleCredError(false)) {
     print("rr");
     FireError.handleCredError(true);
     return "Invalid credentials!";
   }
   return null;
 }
-void createProfile(){
+
+void createProfile() {
   String email = globals.emailKey.currentState!.value;
   String first = globals.fNameKey.currentState!.value;
   String last = globals.lNameKey.currentState!.value;
-  String phone = globals.phoneKey.currentState!.value == null ? "" : globals.phoneKey.currentState!.value;
-  String pos = globals.roleKey.currentState!.value;
-  UserProfile.createUser(email,first,last,phone);
-  globals.user.sendRequest(pos);
+  String phone = globals.phoneKey.currentState!.value == null
+      ? ""
+      : globals.phoneKey.currentState!.value;
+  //String pos = globals.roleKey.currentState!.value;
+  UserProfile.createUser(email, first, last, phone);
+  //print("Role" + pos);
+  // if (pos != 'Patient') globals.user.sendRequest(pos);
 }
 
-bool phoneValidate(String num){
+bool phoneValidate(String num) {
   bool valid = true;
-  for (int i = 0; i < num.length; i++){
-    if (!isNumeric(num[i])){
+  for (int i = 0; i < num.length; i++) {
+    if (!isNumeric(num[i])) {
       valid = false;
     }
   }
   return valid;
 }
 
-String? phoneError(String num, var key){
-  if (phoneValidate(num)){
+String? phoneError(String num, var key) {
+  if (phoneValidate(num)) {
     return null;
   }
   return "Please only use numbers!";
 }
-void onReset(BuildContext context) async{
+
+void onReset(BuildContext context) async {
   String toast = "A reset link will be sent to your email if it is registered!";
+  // try {
+  //   await globals.auth
+  //       .sendPasswordResetEmail(
+  //         email: globals.emailResetKey.currentState!.value,
+  //       )
+  //       .onError(
+  //         (error, stackTrace) => {
+  //           print(error),
+  //         },
+  //       );
+  // }
   try {
-    await globals.auth.sendPasswordResetEmail(email: globals.emailResetKey.currentState!.value);
-  }
-  catch (e){
+    await globals.auth.sendPasswordResetEmail(
+        email: globals.emailResetKey.currentState!.value);
+  } on FirebaseAuthException catch (e) {
+    print(e.code);
+    print(e.message);
+// show the snackbar here
+
+    // Fluttertoast.showToast(
+    //   msg: toast,
+    //   toastLength: Toast.LENGTH_LONG,
+    //   gravity: ToastGravity.BOTTOM,
+    //   timeInSecForIosWeb: 5,
+    //   backgroundColor: Colors.white,
+    //   textColor: Colors.red,
+    //   fontSize: 16.0,
+    // );
+  } catch (e) {
     print(e);
   }
-  Fluttertoast.showToast(msg: toast, toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 5, backgroundColor: Colors.white, textColor: Colors.red, fontSize: 16.0);
-  Navigator.pop(context);
+
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ResetScreen(),
+    ),
+    (route) => false,
+  );
 }
 
-bool roleValidate(String text){
+bool roleValidate(String text) {
   print(text.length == 0);
-  if (text.length == 0){
+  if (text.length == 0) {
     return false;
   }
   return true;
 }
 
-String? roleError(String text, var key){
-  if (roleValidate(text)){
+String? roleError(String text, var key) {
+  if (roleValidate(text)) {
     return null;
   }
   return "Please select a role!";
 }
-Future<bool> onLogin(BuildContext context) async{
+
+Future<bool> onLogin(BuildContext context) async {
   bool canLogin = false;
   bool done = true;
-  for (int i = 0; i < globals.loginKeys.length; i++){
+  for (int i = 0; i < globals.loginKeys.length; i++) {
     print(globals.loginKeys[i]);
-    if (!globals.loginKeys[i].currentState!.validate()){
+    if (!globals.loginKeys[i].currentState!.validate()) {
       done = false;
     }
   }
-  if (done){
+  if (done) {
     try {
       globals.passLoginKey.currentState!.validate();
       print("reached");
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: globals.emailLoginKey.currentState!.value,
-        password: globals.passLoginKey.currentState!.value
-      );
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: globals.emailLoginKey.currentState!.value,
+              password: globals.passLoginKey.currentState!.value);
       UserProfile.userSetup();
       canLogin = true;
-    }
-    on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       print("reached 2");
       print(e);
       FireError.handleCredError(true);
       globals.passLoginKey.currentState!.validate();
       print(FireError.handleCredError(false));
-    }
-    catch (e){
+    } catch (e) {
       print(e);
     }
   }
   return canLogin;
 }
-void onRegister(BuildContext context) async{
+
+void onRegister(BuildContext context) async {
   bool done = true;
-  for (int i = 0; i < globals.regKeys.length; i++){
+  for (int i = 0; i < globals.regKeys.length; i++) {
     print(globals.regKeys[i]);
-    if (!globals.regKeys[i].currentState!.validate()){
+    if (!globals.regKeys[i].currentState!.validate()) {
       done = false;
     }
   }
   print(done);
 
-  if (done){
+  if (done) {
     String email = globals.emailKey.currentState!.value;
     String phone = globals.phoneKey.currentState!.value;
     print(email);
-    try{
+    try {
       print("reached");
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: globals.passKey.currentState!.value
-      );
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+              email: email, password: globals.passKey.currentState!.value);
       createProfile();
       print("DOne");
       String toast = "Please check your email and verify it!";
-      if (!globals.user.getUser().emailVerified){
+      if (!globals.user.getUser().emailVerified) {
         globals.user.getUser().sendEmailVerification();
-      }
-      else{
+      } else {
         toast = "Email already verified!";
       }
-      Fluttertoast.showToast(msg: toast, toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.BOTTOM, timeInSecForIosWeb: 5, backgroundColor: Colors.white, textColor: Colors.red, fontSize: 16.0);
-      Navigator.push(context,MaterialPageRoute(builder : (context) => HomePage(context: context)));
-    }
-    on FirebaseAuthException catch (e){
-      if (e.code == 'email-already-in-use'){
+      Fluttertoast.showToast(
+          msg: toast,
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.white,
+          textColor: Colors.red,
+          fontSize: 16.0);
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => HomePage(context: context)));
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
         FireError.setEmailError(true);
         FireError.setEmail(email);
         globals.emailKey.currentState!.validate();
       }
-    }
-    catch (e){
+    } catch (e) {
       print(e);
     }
   }
-
 }
-
-
-
-
-
-
