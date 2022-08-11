@@ -170,7 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               number,
                               widget.returnedImage,
                               locs,
-                              EventCalendar.getAppts(),
+                              //EventCalendar.getAppts(),
                               widget.nullAppts);
                           DoctorController().updateDoc(globals.user.getUid());
                           Navigator.pop(context);
@@ -251,11 +251,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       text: "APPOINTMENTS",
                       color: globals.textColor),
                 if (globals.user.isDoc())
-                  EventCalendar(
-                      user: globals.user,
-                      embed: false,
-                      enabled: true,
-                      nullAppts: true),
+                  // EventCalendar(
+                  //     user: globals.user,
+                  //     embed: false,
+                  //     enabled: true,
+                  //     nullAppts: true),
                 base.BaseDivider(
                     offset: 0.02,
                     text: "BASIC INFORMATION",

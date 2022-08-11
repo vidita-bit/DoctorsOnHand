@@ -2,6 +2,9 @@ import 'package:doctorsonhand/screens/resetScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:intl/date_symbol_data_file.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'register.dart';
 import 'reset.dart';
 import 'home.dart';
@@ -35,6 +38,12 @@ Future<void> main() async {
   await Firebase.initializeApp();
   DoctorController controller = DoctorController();
   User? user = FirebaseAuth.instance.currentUser;
+  //initializeDateFormatting('en', '');
+
+  // DateTime now = DateTime.now();
+  // var dateString = DateFormat('dd-MM-yyyy').format(now);
+  // final String configFileName = 'lastConfig.$dateString.json';
+  initializeDateFormatting();
   runApp(MyApp(user: user));
 }
 
